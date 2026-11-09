@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { expandLessons, latestProgress, lessonInstanceId, pace, remainingLessons } from "../dist/engine.js";
+import { browserDateKey, currentOrNextLessonId, expandLessons, latestProgress, lessonInstanceId, pace, remainingLessons } from "../dist/engine.js";
 
 const assignment = (id, weekday, periodId = "p1", classId = "c1", grade = "七年級") => ({ id, weekday, periodId, classId, grade, subjectId: "s1", materialId: "m1" });
 
@@ -51,4 +51,22 @@ test("目前進度依授課日期與節次，不依更新時間", () => {
     { id: "latest-lesson", lessonDate: "2026-11-02", periodId: "p1", status: "completed", updatedAt: "2026-11-02" }
   ]);
   assert.equal(current.id, "latest-lesson");
+});
+
+test("當前或下一節依瀏覽器本地日期與時間判斷", () => {
+  const now = new Date(2026, 10, 10, 9, 5);
+  const lessons = [{ id: "lesson-1", periodId: "p1" }, { id: "lesson-2", periodId: "p2" }];
+  const periods = [
+    { id: "p1", start: "08:10", end: "09:00" },
+    { id: "p2", start: "09:10", end: "10:00" }
+  ];
+  assert.equal(browserDateKey(now), "2026-11-10");
+  assert.equal(currentOrNextLessonId({ lessons, periods, selectedDate: "2026-11-10", now }), "lesson-2");
+  assert.equal(currentOrNextLessonId({ lessons, periods, selectedDate: "2026-11-11", now }), null);
+});
+
+test("最後一節下課後不再標示當前或下一節", () => {
+  const lessons = [{ id: "lesson-7", periodId: "p7" }];
+  const periods = [{ id: "p7", start: "15:10", end: "16:00" }];
+  assert.equal(currentOrNextLessonId({ lessons, periods, selectedDate: "2026-11-10", now: new Date(2026, 10, 10, 16, 1) }), null);
 });

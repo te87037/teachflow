@@ -1,16 +1,17 @@
 import { BUSINESS_STORES, all, applyRemoteOperations, commitImportBatch, exportSnapshot, getSetting, put, remove, seedIfEmpty } from "./db.js";
-import { addDays, dateKey, expandLessons, latestProgress, pace, remainingLessons, weekdayOf } from "./engine.js";
+import { addDays, browserDateKey, currentOrNextLessonId, dateKey, expandLessons, latestProgress, pace, remainingLessons, weekdayOf } from "./engine.js";
 import { prepareImportPages } from "./ocr.js";
 import { parseImportCandidates } from "./ocr-parser.js";
 import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations, recognizeOcrPage } from "./remote.js";
 
-const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], importBatches: [], lessons: [], selectedDate: dateKey() };
+const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], importBatches: [], lessons: [], selectedDate: browserDateKey() };
 const weekdays = ["", "一", "二", "三", "四", "五", "六", "日"];
 const $ = (selector) => document.querySelector(selector);
 const byId = (items, id) => items.find((item) => item.id === id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 let syncing = false;
 let toastTimer;
+let lastBrowserDate = browserDateKey();
 
 async function load({ seed = true } = {}) {
   if (seed) await seedIfEmpty();
@@ -95,7 +96,7 @@ function targetFor(classId) {
 }
 
 function dateForWeekday(weekday) {
-  const today = dateKey();
+  const today = browserDateKey();
   return addDays(today, weekday - weekdayOf(today));
 }
 
@@ -105,11 +106,27 @@ function formatHeaderDate(key) {
 }
 
 function isNextLesson(lesson, dayLessons) {
-  if (state.selectedDate !== dateKey()) return false;
-  const time = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Taipei", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
-  const currentMinute = Number(time.replace(":", ""));
-  const next = dayLessons.find((item) => Number(byId(state.periods, item.periodId)?.end?.replace(":", "") || 0) >= currentMinute);
-  return next?.id === lesson.id;
+  return currentOrNextLessonId({ lessons: dayLessons, periods: state.periods, selectedDate: state.selectedDate }) === lesson.id;
+}
+
+function refreshCurrentLessonIndicator() {
+  const today = browserDateKey();
+  if (state.selectedDate === lastBrowserDate && today !== lastBrowserDate) {
+    state.selectedDate = today;
+    lastBrowserDate = today;
+    renderToday();
+    return;
+  }
+  lastBrowserDate = today;
+  const lessons = state.lessons.filter((lesson) => lesson.date === state.selectedDate && lesson.status === "scheduled");
+  const activeId = currentOrNextLessonId({ lessons, periods: state.periods, selectedDate: state.selectedDate });
+  document.querySelectorAll("#today-lessons .lesson-card").forEach((card) => {
+    const active = card.dataset.lessonId === activeId;
+    card.classList.toggle("is-next", active);
+    const tag = card.querySelector(".next-tag");
+    if (active && !tag && !card.querySelector(".swap-tag")) card.insertAdjacentHTML("afterbegin", '<span class="next-tag">當前／下一節</span>');
+    if (!active && tag) tag.remove();
+  });
 }
 
 function paceClass(value) {
@@ -535,7 +552,12 @@ $("#connect-google").addEventListener("click", async () => {
 $("#disconnect-google").addEventListener("click", () => { disconnectGoogle(); $("#sync-access-code").value = ""; setConnectionStatus("本機已儲存"); });
 window.addEventListener("online", () => { setConnectionStatus(isGoogleConnected() ? "同步中…" : "本機已儲存"); void syncGoogleSheet(); });
 window.addEventListener("offline", () => setConnectionStatus("離線 · 本機已儲存"));
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void syncGoogleSheet(); });
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  refreshCurrentLessonIndicator();
+  void syncGoogleSheet();
+});
+setInterval(refreshCurrentLessonIndicator, 30000);
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
 load().then(async () => {

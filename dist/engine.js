@@ -9,6 +9,28 @@ export function dateKey(date = new Date()) {
   }).format(date);
 }
 
+export function browserDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function timeToMinutes(value) {
+  const [hour, minute] = String(value || "").split(":").map(Number);
+  return Number.isFinite(hour) && Number.isFinite(minute) ? hour * 60 + minute : null;
+}
+
+export function currentOrNextLessonId({ lessons, periods, selectedDate, now = new Date() }) {
+  if (selectedDate !== browserDateKey(now)) return null;
+  const currentMinute = now.getHours() * 60 + now.getMinutes();
+  return [...lessons]
+    .map((lesson) => ({ lesson, period: periods.find((item) => item.id === lesson.periodId) }))
+    .filter(({ period }) => timeToMinutes(period?.end) !== null)
+    .sort((a, b) => timeToMinutes(a.period.start) - timeToMinutes(b.period.start))
+    .find(({ period }) => timeToMinutes(period.end) >= currentMinute)?.lesson.id || null;
+}
+
 export function weekdayOf(key) {
   const [year, month, day] = key.split("-").map(Number);
   const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
