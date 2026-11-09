@@ -141,3 +141,7 @@ export function latestProgress(records) {
     .sort((a, b) => a.lessonDate.localeCompare(b.lessonDate) || String(a.periodId).localeCompare(String(b.periodId)))
     .at(-1) || null;
 }
+
+export function classProgress(records, classId) {
+  return latestProgress(records.filter((record) => record.classId === classId));
+}

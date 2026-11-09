@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { browserDateKey, currentOrNextLessonId, expandLessons, latestProgress, lessonInstanceId, pace, remainingLessons } from "../dist/engine.js";
+import { browserDateKey, classProgress, currentOrNextLessonId, expandLessons, latestProgress, lessonInstanceId, pace, remainingLessons } from "../dist/engine.js";
 
 const assignment = (id, weekday, periodId = "p1", classId = "c1", grade = "七年級") => ({ id, weekday, periodId, classId, grade, subjectId: "s1", materialId: "m1" });
 
@@ -51,6 +51,16 @@ test("目前進度依授課日期與節次，不依更新時間", () => {
     { id: "latest-lesson", lessonDate: "2026-11-02", periodId: "p1", status: "completed", updatedAt: "2026-11-02" }
   ]);
   assert.equal(current.id, "latest-lesson");
+});
+
+test("同班所有節次共用最新進度且不受單元或教材影響", () => {
+  const current = classProgress([
+    { id: "old-unit", classId: "c1", lessonDate: "2026-11-09", periodId: "p1", chapter: "第一單元", materialId: "m1", page: 20, status: "completed" },
+    { id: "new-unit", classId: "c1", lessonDate: "2026-11-10", periodId: "p2", chapter: "第二單元", materialId: "m2", page: 35, status: "completed" },
+    { id: "other-class", classId: "c2", lessonDate: "2026-11-11", periodId: "p3", chapter: "第三單元", materialId: "m3", page: 99, status: "completed" }
+  ], "c1");
+  assert.equal(current.id, "new-unit");
+  assert.equal(current.page, 35);
 });
 
 test("當前或下一節依瀏覽器本地日期與時間判斷", () => {

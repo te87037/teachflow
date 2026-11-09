@@ -1,5 +1,5 @@
 import { BUSINESS_STORES, all, applyRemoteOperations, commitImportBatch, exportSnapshot, getSetting, put, remove, seedIfEmpty } from "./db.js";
-import { addDays, browserDateKey, currentOrNextLessonId, dateKey, expandLessons, latestProgress, pace, remainingLessons, weekdayOf } from "./engine.js";
+import { addDays, browserDateKey, classProgress, currentOrNextLessonId, dateKey, expandLessons, pace, remainingLessons, weekdayOf } from "./engine.js";
 import { prepareImportPages } from "./ocr.js";
 import { parseImportCandidates } from "./ocr-parser.js";
 import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations, recognizeOcrPage } from "./remote.js";
@@ -88,7 +88,7 @@ async function syncGoogleSheet() {
 }
 
 function progressFor(classId) {
-  return latestProgress(state.records.filter((record) => record.classId === classId));
+  return classProgress(state.records, classId);
 }
 
 function targetFor(classId) {
@@ -151,7 +151,7 @@ function renderToday() {
     const klass = byId(state.classes, lesson.classId);
     const subject = byId(state.subjects, lesson.subjectId);
     const period = byId(state.periods, lesson.periodId);
-    const record = state.records.find((item) => item.lessonId === lesson.id) || progressFor(lesson.classId);
+    const record = progressFor(lesson.classId);
     const target = targetFor(lesson.classId);
     const remaining = target ? remainingLessons(state.lessons, { classId: lesson.classId, subjectId: lesson.subjectId, cutoffDate: target.cutoffDate, fromDate: dateKey() }) : [];
     const result = target ? pace({ targetPage: target.targetPage, completedPage: record?.page || 0, remainingCount: remaining.length }) : { perLesson: null };
@@ -268,7 +268,7 @@ async function saveInlineRecord(lessonId, patch) {
   const lesson = state.lessons.find((item) => item.id === lessonId);
   if (!lesson) return;
   const existing = state.records.find((record) => record.lessonId === lessonId);
-  const previous = existing || progressFor(lesson.classId) || {};
+  const previous = progressFor(lesson.classId) || existing || {};
   const record = {
     id: existing?.id || crypto.randomUUID(), lessonId: lesson.id, lessonDate: lesson.date, periodId: lesson.periodId,
     classId: lesson.classId, subjectId: lesson.subjectId, materialId: lesson.materialId,
