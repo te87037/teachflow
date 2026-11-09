@@ -45,12 +45,12 @@ test("配速公式與零堂警示", () => {
   assert.equal(pace({ targetPage: 52, completedPage: 20, remainingCount: 0 }).warning, "已無剩餘課堂");
 });
 
-test("目前進度依授課日期與節次，不依更新時間", () => {
+test("目前進度以班級最後一次修改為準，任何日期都能更新", () => {
   const current = latestProgress([
     { id: "late-edit", lessonDate: "2026-11-01", periodId: "p1", status: "completed", updatedAt: "2026-11-20" },
     { id: "latest-lesson", lessonDate: "2026-11-02", periodId: "p1", status: "completed", updatedAt: "2026-11-02" }
   ]);
-  assert.equal(current.id, "latest-lesson");
+  assert.equal(current.id, "late-edit");
 });
 
 test("同班所有節次共用最新進度且不受單元或教材影響", () => {

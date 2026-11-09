@@ -1,5 +1,5 @@
 import { BUSINESS_STORES, all, applyRemoteOperations, commitImportBatch, exportSnapshot, getSetting, put, remove, seedIfEmpty } from "./db.js";
-import { addDays, browserDateKey, classProgress, currentOrNextLessonId, dateKey, expandLessons, pace, remainingLessons, weekdayOf } from "./engine.js";
+import { addDays, browserDateKey, classProgress, currentOrNextLessonId, dateKey, expandLessons, pace, remainingLessons, weekdayOf } from "./engine.js?v=14";
 import { prepareImportPages } from "./ocr.js";
 import { parseImportCandidates } from "./ocr-parser.js";
 import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations, recognizeOcrPage } from "./remote.js";

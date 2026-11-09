@@ -1,4 +1,4 @@
-const CACHE = "teachflow-v13";
+const CACHE = "teachflow-v14";
 const ASSETS = ["./", "./index.html", "./styles.css", "./responsive.css", "./ocr.css", "./app.js", "./db.js", "./engine.js", "./ocr.js", "./ocr-parser.js", "./remote.js", "./remote-config.js", "./manifest.webmanifest", "./icon.svg", "./vendor/pdf.mjs", "./vendor/pdf.worker.mjs"];
 self.addEventListener("install", (event) => event.waitUntil(Promise.all([self.skipWaiting(), caches.open(CACHE).then((cache) => cache.addAll(ASSETS))])));
 self.addEventListener("activate", (event) => event.waitUntil(Promise.all([self.clients.claim(), caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))])));

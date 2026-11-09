@@ -138,7 +138,7 @@ export function pace({ targetPage, completedPage, remainingCount }) {
 export function latestProgress(records) {
   return [...records]
     .filter((record) => record.status === "completed")
-    .sort((a, b) => a.lessonDate.localeCompare(b.lessonDate) || String(a.periodId).localeCompare(String(b.periodId)))
+    .sort((a, b) => String(a.updatedAt || "").localeCompare(String(b.updatedAt || "")) || a.lessonDate.localeCompare(b.lessonDate) || String(a.periodId).localeCompare(String(b.periodId)))
     .at(-1) || null;
 }
 
