@@ -87,13 +87,13 @@
 
   <dialog id="record-dialog">
     <form id="record-form" method="dialog">
-      <div class="dialog-heading"><div><p class="kicker">30 秒快記</p><h2 id="record-title">課堂紀錄</h2></div><button class="icon-button" value="cancel" aria-label="關閉">×</button></div>
+      <div class="dialog-heading"><div><p class="kicker">30 秒快記</p><h2 id="record-title">課堂紀錄</h2></div><button class="icon-button close-record-dialog" type="button" aria-label="關閉">×</button></div>
       <input id="record-lesson-id" type="hidden">
       <label>章節／主題<input id="record-chapter" required placeholder="例：第二課 權利與義務"></label>
       <label>教材頁碼<div class="page-stepper"><button type="button" data-step="-1">−</button><input id="record-page" type="number" min="0" required><button type="button" data-step="1">+1</button><button type="button" data-step="2">+2</button></div></label>
       <label>教學狀態<select id="record-status"><option value="completed">已講完</option><option value="review">待檢討</option><option value="partial">進行中</option></select></label>
       <label>下次備忘<textarea id="record-memo" rows="3" placeholder="例：先檢討學習單第 3 題"></textarea></label>
-      <div class="dialog-actions"><button class="secondary-button" value="cancel">取消</button><button id="save-record" class="primary-button" value="default">儲存紀錄</button></div>
+      <div class="dialog-actions"><button class="secondary-button close-record-dialog" type="button">取消</button><button id="save-record" class="primary-button" type="submit">儲存紀錄</button></div>
     </form>
   </dialog>
 

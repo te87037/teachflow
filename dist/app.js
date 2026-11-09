@@ -169,6 +169,10 @@ document.querySelectorAll(".nav-button").forEach((button) => button.addEventList
 }));
 $("#selected-date").addEventListener("change", (event) => { state.selectedDate = event.target.value; renderToday(); });
 $("#record-form").addEventListener("submit", saveRecord);
+document.querySelectorAll(".close-record-dialog").forEach((button) => button.addEventListener("click", () => {
+  state.activeLesson = null;
+  $("#record-dialog").close();
+}));
 $("#record-form").querySelectorAll("[data-step]").forEach((button) => button.addEventListener("click", () => { $("#record-page").value = Math.max(0, Number($("#record-page").value || 0) + Number(button.dataset.step)); }));
 $("#history-search").addEventListener("input", renderHistory);
 $("#history-class").addEventListener("change", renderHistory);
