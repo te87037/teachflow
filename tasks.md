@@ -16,4 +16,4 @@
 - [ ] TASK-012 完成正式 OCR 供應商介面、多頁 PDF、人工標註集與準確率報告。
 - [ ] TASK-013 完成 Google Sheets OAuth、穩定列映射、重試與授權失效恢復。
 - [ ] TASK-014 完成備份還原、列印 PDF、資料遷移與未同步資料保護測試。
-- [~] TASK-015 部署到 Sites 私人網址；GitHub 與部署結果以實際流程更新。
+- [x] TASK-015 推送 GitHub 並部署到 Sites 私人網址；部署狀態已驗證為 succeeded。

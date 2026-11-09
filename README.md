@@ -2,6 +2,8 @@
 
 TeachFlow 是為台灣國高中教師設計的手機優先 PWA。現在的可執行版本聚焦今日課堂快記、歷史查詢、段考配速、離線保存與安全 CSV 匯出；雲端登入、真實 OCR、跨裝置同步與 Google Sheets 仍明確列為待整合。
 
+私人部署網址：<https://teachflow.immensestarfish.chatgpt.site>
+
 ## 本機啟動
 
 此專案沒有第三方執行期依賴。請使用任一靜態 HTTP server 服務 `dist/`，不要直接以 `file://` 開啟，否則 Service Worker 不會運作。
@@ -19,7 +21,7 @@ npm run check
 
 ## 部署
 
-Sites 讀取 `.openai/hosting.json`，靜態輸出目錄為 `dist`。部署需以 Sites 工作流程推送原始碼、封裝同一 commit，再儲存並部署版本。新的 Site 預設為私人。
+Sites 讀取 `.openai/hosting.json`，靜態輸出目錄為 `dist`。部署需以 Sites 工作流程推送原始碼、封裝同一 commit，再儲存並部署版本。現有 Site 為私人，訪客會先看見 ChatGPT 登入閘門。
 
 ## 環境設定
 
