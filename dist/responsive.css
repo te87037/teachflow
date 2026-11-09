@@ -1,4 +1,50 @@
 /* Mobile styles live in styles.css. Wider layouts progressively enhance them. */
+@media (max-width: 699px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .tf-shell {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-bottom: calc(2.5rem + env(safe-area-inset-bottom));
+  }
+
+  .tf-header {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .header-top > div:first-child,
+  .brand-line,
+  .header-meta,
+  .tf-main { min-width: 0; }
+
+  #day-switcher-buttons {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .day-button {
+    min-width: 0;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand-line strong { font-size: 14px; }
+  .version-badge { padding-inline: 5px; font-size: 9px; }
+  .header-actions { flex: 0 0 auto; gap: 4px; }
+  .top-button { padding: 6px 8px; }
+  .top-button span:first-child { display: none; }
+  .cloud-badge { max-width: 8rem; }
+}
+
 @media (min-width: 700px) {
   body { padding: 1.25rem; }
 

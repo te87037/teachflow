@@ -81,7 +81,7 @@
   border-top: 1px solid var(--line);
 }
 
-@media (max-width: 390px) {
+@media (max-width: 430px) {
   .review-fields.three-columns,
   .calendar-fields { grid-template-columns: 1fr; }
   .calendar-fields .title-field { grid-column: auto; }

@@ -17,7 +17,12 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
 test("介面會依手機、平板與桌機寬度切換欄數", async () => {
   const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
   const responsive = await readFile(new URL("../dist/responsive.css", import.meta.url), "utf8");
+  const ocr = await readFile(new URL("../dist/ocr.css", import.meta.url), "utf8");
   assert.match(html, /responsive\.css/);
+  assert.match(responsive, /max-width:\s*430px/);
+  assert.match(responsive, /overflow-x:\s*hidden/);
+  assert.match(responsive, /safe-area-inset-bottom/);
+  assert.match(ocr, /max-width:\s*430px/);
   assert.match(responsive, /min-width:\s*700px/);
   assert.match(responsive, /min-width:\s*1050px/);
   assert.match(responsive, /repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
