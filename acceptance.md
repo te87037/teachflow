@@ -20,8 +20,7 @@
 ## 部署驗證
 
 - GitHub：`main` 已推送；首版實作 commit 為 `06d1bf91784e990fa7a96e5762d3e99568c04510`。
-- Sites：私人正式部署已回報 `succeeded`，網址為 <https://teachflow.immensestarfish.chatgpt.site>。
-- 未登入狀態：已實測顯示「登入後即可瀏覽」與「使用 ChatGPT 繼續」登入閘門。
-- 登入後主畫面：尚未驗證；瀏覽器安全政策阻止代理跨到 Google 帳號頁，需由網站擁有者本人登入後確認。
+- GitHub Pages：已建立 `.github/workflows/pages.yml`，待 Actions 執行與正式網址驗證。
+- 正式預定網址：<https://te87037.github.io/teachflow/>。
 
 「測試已撰寫」不等同通過；表格只在實際執行成功後標為已實測通過。

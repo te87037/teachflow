@@ -2,7 +2,7 @@
 
 TeachFlow 是為台灣國高中教師設計的手機優先 PWA。現在的可執行版本聚焦今日課堂快記、歷史查詢、段考配速、離線保存與安全 CSV 匯出；雲端登入、真實 OCR、跨裝置同步與 Google Sheets 仍明確列為待整合。
 
-私人部署網址：<https://teachflow.immensestarfish.chatgpt.site>
+正式部署網址：<https://te87037.github.io/teachflow/>
 
 ## 本機啟動
 
@@ -21,7 +21,7 @@ npm run check
 
 ## 部署
 
-Sites 讀取 `.openai/hosting.json`，靜態輸出目錄為 `dist`。部署需以 Sites 工作流程推送原始碼、封裝同一 commit，再儲存並部署版本。現有 Site 為私人，訪客會先看見 ChatGPT 登入閘門。
+GitHub Actions 會在 `main` 更新時執行 `.github/workflows/pages.yml`：先跑核心測試，再將 `dist/` 上傳並部署至 GitHub Pages。部署需要在儲存庫的 **Settings → Pages → Build and deployment → Source** 選擇 **GitHub Actions**。
 
 ## 環境設定
 
@@ -29,7 +29,7 @@ Sites 讀取 `.openai/hosting.json`，靜態輸出目錄為 `dist`。部署需�
 
 - `OCR_PROVIDER_API_KEY`：僅限 Worker，絕不可出現在前端。
 - `GOOGLE_OAUTH_CLIENT_ID`／`GOOGLE_OAUTH_CLIENT_SECRET`：Google Sheets 授權。
-- D1／R2 綁定：由 `.openai/hosting.json` 宣告，不在前端硬編碼。
+- 後端資料庫與檔案儲存尚未選定；GitHub Pages 本身只提供靜態網站託管。
 
 ## 教師快速入門
 
