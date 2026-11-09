@@ -29,8 +29,8 @@ jobs:
 
       - name: Configure secure remote storage
         env:
-          TEACHFLOW_SYNC_BRIDGE_URL: ${{ vars.TEACHFLOW_SYNC_BRIDGE_URL }}
-          GOOGLE_SHEETS_SPREADSHEET_ID: ${{ vars.GOOGLE_SHEETS_SPREADSHEET_ID }}
+          TEACHFLOW_SYNC_BRIDGE_URL: ${{ vars.TEACHFLOW_SYNC_BRIDGE_URL || 'https://script.google.com/macros/s/AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/exec' }}
+          GOOGLE_SHEETS_SPREADSHEET_ID: ${{ vars.GOOGLE_SHEETS_SPREADSHEET_ID || '1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ' }}
         run: >-
           node -e "const fs=require('fs');const config={apiUrl:process.env.TEACHFLOW_SYNC_BRIDGE_URL||'',spreadsheetId:process.env.GOOGLE_SHEETS_SPREADSHEET_ID||''};fs.writeFileSync('dist/remote-config.js','window.__TEACHFLOW_GOOGLE_CONFIG__ = '+JSON.stringify(config)+';\n')"
 
