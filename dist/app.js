@@ -1,14 +1,16 @@
-import { all, put, seedIfEmpty } from "./db.js";
+import { BUSINESS_STORES, all, applyRemoteOperations, exportSnapshot, getSetting, put, remove, seedIfEmpty } from "./db.js";
 import { dateKey, expandLessons, latestProgress, pace, remainingLessons } from "./engine.js";
+import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations } from "./remote.js";
 
 const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], lessons: [], selectedDate: dateKey(), activeLesson: null };
 const byId = (items, id) => items.find((item) => item.id === id);
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
 const formatDate = (key, options = {}) => new Intl.DateTimeFormat("zh-TW", { timeZone: "Asia/Taipei", month: "long", day: "numeric", weekday: "short", ...options }).format(new Date(`${key}T12:00:00+08:00`));
 const $ = (selector) => document.querySelector(selector);
+let syncing = false;
 
-async function load() {
-  await seedIfEmpty();
+async function load({ seed = true } = {}) {
+  if (seed) await seedIfEmpty();
   [state.classes, state.subjects, state.materials, state.periods, state.scheduleVersions, state.events, state.exceptions, state.records, state.targets] = await Promise.all([
     all("classes"), all("subjects"), all("materials"), all("periods"), all("scheduleVersions"), all("calendarEvents"), all("exceptions"), all("records"), all("examTargets")
   ]);
@@ -16,6 +18,67 @@ async function load() {
   const end = state.scheduleVersions.map((item) => item.effectiveTo).filter(Boolean).sort().at(-1) || state.selectedDate;
   state.lessons = expandLessons({ startDate: start, endDate: end, scheduleVersions: state.scheduleVersions, events: state.events, exceptions: state.exceptions });
   renderAll();
+}
+
+function setConnectionStatus(message) {
+  $("#connection-state").textContent = message;
+  $("#cloud-detail").textContent = message;
+}
+
+function queueToOperation(item) {
+  return {
+    operationId: item.id,
+    entityType: item.entityType,
+    entityId: item.entityId,
+    operation: item.operation,
+    updatedAt: item.createdAt,
+    payload: item.payload
+  };
+}
+
+async function selectedSpreadsheetId() {
+  return extractSpreadsheetId($("#spreadsheet-id").value || await getSetting("google-spreadsheet-id") || configuredSpreadsheetId());
+}
+
+async function syncGoogleSheet() {
+  if (syncing || !navigator.onLine || !isGoogleConnected()) return;
+  const spreadsheetId = await selectedSpreadsheetId();
+  if (!spreadsheetId) {
+    setConnectionStatus("請先填入 Google Sheet 網址");
+    return;
+  }
+  syncing = true;
+  setConnectionStatus("Google Sheet 同步中…");
+  try {
+    await put("settings", { id: "google-spreadsheet-id", value: spreadsheetId });
+    const remoteOperations = await pullOperations(spreadsheetId);
+    const queued = await all("syncQueue");
+    const pendingOperations = queued.map(queueToOperation);
+    if (!remoteOperations.length) {
+      const snapshot = await exportSnapshot();
+      const pendingKeys = new Set(pendingOperations.map((item) => `${item.entityType}:${item.entityId}`));
+      const timestamp = new Date().toISOString();
+      for (const store of BUSINESS_STORES) {
+        for (const entity of snapshot[store]) {
+          if (pendingKeys.has(`${store}:${entity.id}`)) continue;
+          pendingOperations.push({ operationId: crypto.randomUUID(), entityType: store, entityId: entity.id, operation: "upsert", updatedAt: entity.updatedAt || timestamp, payload: entity });
+        }
+      }
+    }
+    await appendOperations(spreadsheetId, pendingOperations);
+    for (const item of queued) await remove("syncQueue", item.id);
+    await applyRemoteOperations([...remoteOperations, ...pendingOperations]);
+    await load({ seed: false });
+    setConnectionStatus(`Google Sheet 已同步 · ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}`);
+  } catch (error) {
+    console.error(error);
+    if (error.status === 401) setConnectionStatus("Google 授權已到期，請重新登入");
+    else if (error.status === 403) setConnectionStatus("無權限存取這份 Google Sheet");
+    else if (error.status === 404) setConnectionStatus("找不到指定的 Google Sheet");
+    else setConnectionStatus(`同步失敗：${error.message}`);
+  } finally {
+    syncing = false;
+  }
 }
 
 function progressFor(classId) {
@@ -123,12 +186,13 @@ async function saveRecord(event) {
     memo: $("#record-memo").value.trim(), updatedAt: new Date().toISOString(), version: (existing?.version || 0) + 1
   };
   await put("records", record);
-  await put("syncQueue", { id: crypto.randomUUID(), entityType: "record", entityId: record.id, operation: "upsert", payload: record, createdAt: new Date().toISOString(), status: "pending" });
+  await put("syncQueue", { id: crypto.randomUUID(), entityType: "records", entityId: record.id, operation: "upsert", payload: record, createdAt: record.updatedAt, status: "pending" });
   const index = state.records.findIndex((item) => item.id === record.id);
   if (index >= 0) state.records[index] = record; else state.records.push(record);
   $("#record-dialog").close();
-  showToast("本機已儲存，已加入待同步佇列");
+  showToast(isGoogleConnected() ? "本機已儲存，正在同步 Google Sheet" : "本機已儲存，連線後會同步 Google Sheet");
   renderAll();
+  void syncGoogleSheet();
 }
 
 async function handleImport(event) {
@@ -142,8 +206,10 @@ async function handleImport(event) {
   }
   const batch = { id: crypto.randomUUID(), status: "pending-review", files: files.map((file) => ({ name: file.name, type: file.type, size: file.size })), createdAt: new Date().toISOString(), provider: null, result: null };
   await put("importBatches", batch);
+  await put("syncQueue", { id: crypto.randomUUID(), entityType: "importBatches", entityId: batch.id, operation: "upsert", payload: batch, createdAt: batch.createdAt, status: "pending" });
   $("#import-result").innerHTML = `<div class="import-batch"><strong>已建立待核對批次</strong><br>${files.map((file) => escapeHtml(file.name)).join("、")}<br>原始資料尚未套用；此部署未設定辨識服務。</div>`;
   showToast("已驗證檔案並建立匯入批次");
+  void syncGoogleSheet();
 }
 
 function exportCsv() {
@@ -178,8 +244,36 @@ $("#history-search").addEventListener("input", renderHistory);
 $("#history-class").addEventListener("change", renderHistory);
 $("#import-file").addEventListener("change", handleImport);
 $("#export-button").addEventListener("click", exportCsv);
-window.addEventListener("online", () => { $("#connection-state").textContent = "連線中 · 待雲端設定"; });
-window.addEventListener("offline", () => { $("#connection-state").textContent = "離線 · 本機可編輯"; });
+$("#cloud-button").addEventListener("click", async () => {
+  $("#spreadsheet-id").value = await selectedSpreadsheetId();
+  if (!googleRemoteConfigured()) setConnectionStatus("部署尚未設定 Google OAuth 用戶端 ID");
+  $("#cloud-dialog").showModal();
+});
+$("#close-cloud-dialog").addEventListener("click", () => $("#cloud-dialog").close());
+$("#connect-google").addEventListener("click", async () => {
+  try {
+    setConnectionStatus("等待 Google 授權…");
+    await connectGoogle();
+    await syncGoogleSheet();
+  } catch (error) {
+    console.error(error);
+    setConnectionStatus(error.message === "GOOGLE_CLIENT_NOT_CONFIGURED" ? "部署尚未設定 Google OAuth 用戶端 ID" : "Google 登入未完成");
+  }
+});
+$("#disconnect-google").addEventListener("click", () => {
+  disconnectGoogle();
+  setConnectionStatus("Google 已中斷；本機資料仍保留");
+});
+window.addEventListener("online", () => {
+  setConnectionStatus(isGoogleConnected() ? "已連線，準備同步…" : "連線中 · Google 尚未登入");
+  void syncGoogleSheet();
+});
+window.addEventListener("offline", () => setConnectionStatus("離線 · 本機可編輯，稍後同步"));
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
-load().then(() => { $("#history-class").innerHTML += state.classes.map((item) => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join(""); renderHistory(); }).catch((error) => { console.error(error); showToast("資料庫啟動失敗，請重新整理"); });
+load().then(async () => {
+  $("#history-class").innerHTML += state.classes.map((item) => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join("");
+  $("#spreadsheet-id").value = await selectedSpreadsheetId();
+  setConnectionStatus(navigator.onLine ? (googleRemoteConfigured() ? "Google 尚未登入" : "部署尚未設定 Google OAuth") : "離線 · 本機可編輯，稍後同步");
+  renderHistory();
+}).catch((error) => { console.error(error); showToast("資料庫啟動失敗，請重新整理"); });

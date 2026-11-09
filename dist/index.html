@@ -8,6 +8,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
+  <style>.hero-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.45rem}.hero-actions .ghost-button{min-height:38px;font-size:.75rem}</style>
   <title>TeachFlow 教學進度管家</title>
 </head>
 <body>
@@ -18,7 +19,10 @@
           <p class="eyebrow">TEACHFLOW · 教學進度管家</p>
           <h1>今天的課，心裡有底。</h1>
         </div>
-        <button id="export-button" class="ghost-button" type="button">匯出 CSV</button>
+        <div class="hero-actions">
+          <button id="cloud-button" class="ghost-button" type="button">連接 Google Sheet</button>
+          <button id="export-button" class="ghost-button" type="button">匯出 CSV</button>
+        </div>
       </div>
       <div class="today-summary">
         <div><span id="today-label">—</span><strong id="lesson-count">—</strong></div>
@@ -76,9 +80,9 @@
           <div><span class="step-number">03</span><h3>整合狀態</h3></div>
           <ul class="status-list">
             <li><span class="dot done"></span>離線快取與 IndexedDB 本機保存</li>
-            <li><span class="dot pending"></span>帳號登入、雲端資料隔離與跨裝置衝突</li>
+            <li><span class="dot done"></span>Google 帳號授權與跨裝置時間戳合併</li>
             <li><span class="dot pending"></span>真實 OCR／多模態辨識服務</li>
-            <li><span class="dot pending"></span>Google Sheets OAuth 與列同步</li>
+            <li><span class="dot done"></span>Google Sheets 追加式列同步（部署設定後啟用）</li>
           </ul>
         </article>
       </section>
@@ -97,7 +101,18 @@
     </form>
   </dialog>
 
+  <dialog id="cloud-dialog">
+    <form id="cloud-form" method="dialog">
+      <div class="dialog-heading"><div><p class="kicker">REMOTE STORAGE</p><h2>Google Sheet 遠端儲存</h2></div><button id="close-cloud-dialog" class="icon-button" type="button" aria-label="關閉">×</button></div>
+      <p class="section-note">登入後會把本機待同步資料追加到指定試算表的「TeachFlow資料」工作表，再下載其他裝置的較新版本。</p>
+      <label>Google Sheet 網址或試算表 ID<input id="spreadsheet-id" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/…"></label>
+      <p id="cloud-detail" class="section-note">尚未連接。</p>
+      <div class="dialog-actions"><button id="disconnect-google" class="secondary-button" type="button">中斷連線</button><button id="connect-google" class="primary-button" type="button">使用 Google 登入並同步</button></div>
+    </form>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./remote-config.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>

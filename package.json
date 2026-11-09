@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "check": "node --check dist/app.js && node --check dist/db.js && node --check dist/engine.js"
+    "check": "node --check dist/app.js && node --check dist/db.js && node --check dist/engine.js && node --check dist/remote.js && node --check dist/remote-config.js"
   },
   "engines": {
     "node": ">=20"

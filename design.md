@@ -2,15 +2,14 @@
 
 ## 1. 架構
 
-目前可執行版本採無框架 PWA：`index.html + ES modules + IndexedDB + Service Worker`。核心計算放在純函式模組 `dist/engine.js`，UI 與持久化分離。這讓產品在尚未取得雲端及 OCR 憑證前仍可離線試用，並保留未來把 API 接到 Cloudflare Worker／D1 的路徑。
+目前可執行版本採無框架 PWA：`index.html + ES modules + IndexedDB + Service Worker + Google Identity Services + Google Sheets API`。核心計算放在純函式模組 `dist/engine.js`，UI、持久化與 Google 遠端介面分離。
 
-正式目標架構：
+目前架構：
 
 1. PWA 客戶端：快記、課表、歷史、配速、匯入核對、離線佇列。
-2. 同源 API Worker：身份驗證、帳號範圍授權、冪等同步、版本衝突、OCR 任務、Google OAuth。
-3. D1：跨裝置共同資料來源；每張使用者資料表都含 `user_id` 並由查詢層強制限定。
-4. R2：原始文件與頁面衍生檔；依保存政策刪除。
-5. 可替換辨識介面：PDF 文字擷取優先，掃描頁送 OCR／多模態服務，結果以 JSON Schema 驗證。
+2. Google Identity Services：由教師本人授權 Sheets scope，access token 僅保存在記憶體。
+3. Google Sheets API：將具 UUID 的 SyncOperation 追加到「TeachFlow資料」工作表；試算表 ACL 是遠端資料的授權邊界。
+4. 可替換辨識介面：未來由伺服器保存 OCR 金鑰；前端不得包含供應商密鑰。
 
 ## 2. 資料模型
 
@@ -40,12 +39,12 @@
 
 ## 6. 同步與衝突
 
-IndexedDB 為離線工作集。每次本機寫入同時新增具 UUID 的 SyncOperation。伺服器以操作 ID 冪等，並比較實體版本；版本落後時回傳 conflict，而非 last-write-wins。恢復網路、App 回到前景及手動重試都會觸發補送。Google Sheets 使用 SheetRowMapping 維持穩定列 ID，定位為單向報表同步。
+IndexedDB 是離線工作集。每次本機寫入同時新增具 UUID 的 SyncOperation；Google Sheets 使用 `values.append` 與 `RAW` 輸入模式保存操作 ID、資料類型、資料 ID、動作、原始修改時間與 JSON。網路失敗會保留佇列，成功追加後才移除。本機拉取時依操作 ID 去重，再對每個實體採原始修改時間的 last-write-wins。這是雙向跨裝置同步，不是單向報表匯出。
 
 ## 7. 安全
 
-- 所有 API 依已驗證使用者取得 `user_id`，不得接受客戶端任意指定。
-- OCR／Google 憑證只放 Sites 環境變數，不進入前端 bundle、Git 或日誌。
+- Google Sheets API 只接受 Google OAuth access token，存取範圍仍受試算表 ACL 限制。
+- OAuth client ID 與 spreadsheet ID 是公開部署設定；client secret、refresh token、服務帳戶私鑰與 OCR 金鑰不得進入前端、Git 或日誌。
 - 上傳限制 MIME、真實檔頭、大小、頁數、加密與損壞狀態。
 - CSV 公式注入防護；畫面輸出 HTML escaping；CSP 與安全標頭在 Worker 階段加入。
 - 原始文件預設短期保存，正式政策與刪除入口在 OCR 上線前完成。

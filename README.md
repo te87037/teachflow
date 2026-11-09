@@ -1,6 +1,6 @@
 # TeachFlow 教學進度管家
 
-TeachFlow 是為台灣國高中教師設計的手機優先 PWA。現在的可執行版本聚焦今日課堂快記、歷史查詢、段考配速、離線保存與安全 CSV 匯出；雲端登入、真實 OCR、跨裝置同步與 Google Sheets 仍明確列為待整合。
+TeachFlow 是為台灣國高中教師設計的手機優先 PWA。可執行版本包含今日課堂快記、歷史查詢、段考配速、IndexedDB 離線保存、安全 CSV 匯出，以及以 Google OAuth 將待同步操作追加到指定 Google Sheet 的跨裝置同步。
 
 正式部署網址：<https://te87037.github.io/teachflow/>
 
@@ -25,11 +25,12 @@ GitHub Actions 會在 `main` 更新時執行 `.github/workflows/pages.yml`：先
 
 ## 環境設定
 
-目前靜態版本不需環境變數。正式伺服器整合預計使用：
+請在 GitHub 儲存庫 **Settings → Secrets and variables → Actions → Variables** 建立：
 
-- `OCR_PROVIDER_API_KEY`：僅限 Worker，絕不可出現在前端。
-- `GOOGLE_OAUTH_CLIENT_ID`／`GOOGLE_OAUTH_CLIENT_SECRET`：Google Sheets 授權。
-- 後端資料庫與檔案儲存尚未選定；GitHub Pages 本身只提供靜態網站託管。
+- `GOOGLE_OAUTH_CLIENT_ID`：Google Cloud 的「網頁應用程式」OAuth 用戶端 ID；其 Authorized JavaScript origin 必須包含 `https://te87037.github.io`。網頁用戶端不使用 client secret。
+- `GOOGLE_SHEETS_SPREADSHEET_ID`：資料要寫入的試算表 ID（網址 `/d/` 與下一個 `/` 之間）。也可由教師在畫面輸入另一份 Sheet。
+
+Google Cloud 專案需啟用 Google Sheets API，並設定 OAuth 同意畫面。部署 workflow 只把上述公開設定寫進 `remote-config.js`；不得加入 client secret、服務帳戶私鑰或 API 金鑰。GitHub Pages 本身只託管靜態網站，真正的遠端資料位於 Google Sheet。
 
 ## 教師快速入門
 
@@ -38,18 +39,20 @@ GitHub Actions 會在 `main` 更新時執行 `.github/workflows/pages.yml`：先
 3. 在「配速」核對段考前有效堂數與每堂建議頁數，可展開日期明細。
 4. 在「紀錄」搜尋及核對歷史，右上角可匯出 UTF-8 BOM CSV。
 5. 在「設定」可查看週課表；上傳文件只建立待核對批次，不會直接套用。
+6. 按「連接 Google Sheet」，確認試算表網址後使用 Google 登入；第一次同步會自動建立「TeachFlow資料」工作表。
 
 ## 維護與資料
 
 - IndexedDB 名稱為 `teachflow`；資料庫版本目前為 1。
-- Service Worker cache 名稱為 `teachflow-v1`。更新靜態資源時應同步增加 cache 版本。
+- Service Worker cache 名稱為 `teachflow-v3`。更新靜態資源時應同步增加 cache 版本。
 - 資料模型變更必須先新增遷移，不得刪除 `syncQueue` 中尚未同步的操作。
 - 核心計算規則修改時，同步更新 spec.md、design.md、tests 與 acceptance.md。
 
 ## 已知限制
 
-- 尚未建立伺服器帳號、雲端資料庫與真正的帳號隔離；私人 Sites 存取不等同多使用者產品登入。
+- Google 存取權由該試算表的 Drive 權限控制；目前沒有產品自己的多使用者帳號或管理後台。
 - 匯入只完成前端檔案驗證與批次建立，沒有呼叫模擬或真實 OCR。
 - 課表目前只讀；尚未提供版本編輯、原子對調與撤銷 UI。
-- 同步佇列已建立，但尚未有遠端端點，因此狀態會保持 pending。
+- OAuth access token 到期後需再次按 Google 登入；應用程式不保存 refresh token。
+- 追加式同步保留操作歷史，跨裝置同一筆資料以原始修改時間較新者為準；尚未提供人工衝突選擇 UI。
 - PWA 圖示目前為 SVG；正式 iOS 發佈前補 192px／512px PNG 與 Apple touch icon。

@@ -1,6 +1,7 @@
 const DB_NAME = "teachflow";
 const DB_VERSION = 1;
 const STORES = ["classes", "subjects", "materials", "periods", "scheduleVersions", "calendarEvents", "exceptions", "records", "examTargets", "importBatches", "syncQueue", "settings"];
+export const BUSINESS_STORES = STORES.filter((name) => !["syncQueue", "settings"].includes(name));
 
 let databasePromise;
 
@@ -45,6 +46,41 @@ export async function putMany(storeName, values) {
     const transaction = db.transaction(storeName, "readwrite");
     for (const value of values) transaction.objectStore(storeName).put(value);
     transaction.oncomplete = resolve;
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function getSetting(id) {
+  const db = await openDatabase();
+  return new Promise((resolve, reject) => {
+    const request = db.transaction("settings").objectStore("settings").get(id);
+    request.onsuccess = () => resolve(request.result?.value);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function exportSnapshot() {
+  const entries = await Promise.all(BUSINESS_STORES.map(async (name) => [name, await all(name)]));
+  return Object.fromEntries(entries);
+}
+
+export async function applyRemoteOperations(operations) {
+  const latest = new Map();
+  for (const item of operations) {
+    if (!BUSINESS_STORES.includes(item.entityType) || !item.entityId) continue;
+    const key = `${item.entityType}:${item.entityId}`;
+    const current = latest.get(key);
+    if (!current || String(item.updatedAt).localeCompare(String(current.updatedAt)) > 0 || (item.updatedAt === current.updatedAt && item.operationId > current.operationId)) latest.set(key, item);
+  }
+  const db = await openDatabase();
+  const transaction = db.transaction(BUSINESS_STORES, "readwrite");
+  for (const item of latest.values()) {
+    const store = transaction.objectStore(item.entityType);
+    if (item.operation === "delete") store.delete(item.entityId);
+    else if (item.payload) store.put(item.payload);
+  }
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve(latest.size);
     transaction.onerror = () => reject(transaction.error);
   });
 }
