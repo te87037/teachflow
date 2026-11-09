@@ -14,6 +14,15 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(app, /saveInlineRecord/);
 });
 
+test("介面會依手機、平板與桌機寬度切換欄數", async () => {
+  const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
+  const responsive = await readFile(new URL("../dist/responsive.css", import.meta.url), "utf8");
+  assert.match(html, /responsive\.css/);
+  assert.match(responsive, /min-width:\s*700px/);
+  assert.match(responsive, /min-width:\s*1050px/);
+  assert.match(responsive, /repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
+});
+
 test("Google Sheet 遠端儲存使用 OAuth 公開設定且不含私鑰", async () => {
   const [html, remote, workflow, serviceWorker] = await Promise.all([
     readFile(new URL("../dist/index.html", import.meta.url), "utf8"),

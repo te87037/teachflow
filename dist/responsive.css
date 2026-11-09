@@ -1,0 +1,65 @@
+/* Mobile styles live in styles.css. Wider layouts progressively enhance them. */
+@media (min-width: 700px) {
+  body { padding: 1.25rem; }
+
+  .tf-shell {
+    width: 100%;
+    max-width: 72rem;
+    min-height: calc(100vh - 2.5rem);
+    border-radius: 22px;
+    overflow: hidden;
+  }
+
+  .tf-header { padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1rem; }
+  .brand-line strong { font-size: 18px; }
+  .tf-nav { max-width: 42rem; }
+  .tf-main { padding: 1.5rem; }
+  .day-switcher { padding: 10px 14px; }
+  .day-button { padding: 6px 14px; }
+
+  #today-lessons,
+  #pace-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .tf-card { margin-bottom: 0; }
+  .lesson-card,
+  .pace-card { height: 100%; }
+  .exam-banner { padding: 1.25rem; }
+  .upload-button { min-height: 9rem; }
+  .schedule-grid { gap: 8px; }
+  .grid-cell { min-height: 48px; }
+  dialog { width: min(calc(100% - 3rem), 26rem); }
+}
+
+@media (min-width: 1050px) {
+  .tf-shell { max-width: 82rem; }
+
+  .tf-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(34rem, 42rem);
+    align-items: end;
+    gap: 2rem;
+    padding: 1.5rem 2rem;
+  }
+
+  .tf-nav {
+    width: 100%;
+    margin-top: 0;
+    justify-self: end;
+  }
+
+  .tf-main { padding: 2rem; }
+
+  #today-lessons,
+  #pace-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  .day-switcher { max-width: 40rem; }
+  .upload-grid { gap: 1rem; }
+  .upload-button { min-height: 11rem; }
+  .schedule-grid { gap: 10px; }
+  .grid-head { padding: 10px 4px; }
+  .grid-cell { min-height: 56px; font-size: 13px; }
+}
