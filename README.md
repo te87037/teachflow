@@ -44,7 +44,7 @@ Google Cloud 專案需啟用 Google Sheets API，並設定 OAuth 同意畫面。
 ## 維護與資料
 
 - IndexedDB 名稱為 `teachflow`；資料庫版本目前為 1。
-- Service Worker cache 名稱為 `teachflow-v6`，安裝後立即接管既有分頁。更新靜態資源時應同步增加 cache 版本。
+- Service Worker cache 名稱為 `teachflow-v7`，安裝後立即接管既有分頁。更新靜態資源時應同步增加 cache 版本。
 - 資料模型變更必須先新增遷移，不得刪除 `syncQueue` 中尚未同步的操作。
 - 核心計算規則修改時，同步更新 spec.md、design.md、tests 與 acceptance.md。
 
@@ -53,6 +53,6 @@ Google Cloud 專案需啟用 Google Sheets API，並設定 OAuth 同意畫面。
 - Google 存取權由該試算表的 Drive 權限控制；目前沒有產品自己的多使用者帳號或管理後台。
 - 匯入只完成前端檔案驗證與批次建立，沒有呼叫模擬或真實 OCR。
 - 課表目前只讀；尚未提供版本編輯、原子對調與撤銷 UI。
-- OAuth access token 到期後需再次按 Google 登入；應用程式不保存 refresh token。
+- OAuth access token 只保留在目前分頁的 session，重整時若仍有效會自動恢復並同步；關閉分頁或 token 到期後需再次按 Google 登入。應用程式不保存 refresh token。
 - 追加式同步保留操作歷史，跨裝置同一筆資料以原始修改時間較新者為準；尚未提供人工衝突選擇 UI。
 - PWA 圖示目前為 SVG；正式 iOS 發佈前補 192px／512px PNG 與 Apple touch icon。

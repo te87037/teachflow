@@ -4,8 +4,37 @@ const SHEET_NAME = "TeachFlow資料";
 const HEADER = ["操作ID", "資料類型", "資料ID", "動作", "修改時間", "JSON資料"];
 
 let accessToken = "";
-let tokenClient;
+let accessTokenExpiresAt = 0;
 let googleScriptPromise;
+const TOKEN_STORAGE_KEY = "teachflow-google-oauth-session";
+
+function clearAccessToken() {
+  accessToken = "";
+  accessTokenExpiresAt = 0;
+  try { sessionStorage.removeItem(TOKEN_STORAGE_KEY); } catch { /* Storage may be unavailable in private contexts. */ }
+}
+
+function saveAccessToken(response) {
+  accessToken = response.access_token || "";
+  accessTokenExpiresAt = Date.now() + Math.max(0, Number(response.expires_in || 3600) - 30) * 1000;
+  try { sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify({ accessToken, accessTokenExpiresAt })); } catch { /* Keep the token in memory. */ }
+}
+
+function restoreAccessToken() {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(TOKEN_STORAGE_KEY) || "null");
+    if (stored?.accessToken && Number(stored.accessTokenExpiresAt) > Date.now()) {
+      accessToken = stored.accessToken;
+      accessTokenExpiresAt = Number(stored.accessTokenExpiresAt);
+    } else {
+      clearAccessToken();
+    }
+  } catch {
+    clearAccessToken();
+  }
+}
+
+restoreAccessToken();
 
 export function googleRemoteConfigured() {
   return Boolean(CONFIG.clientId);
@@ -36,28 +65,46 @@ function loadGoogleIdentityServices() {
 
 export async function connectGoogle() {
   if (!googleRemoteConfigured()) throw new Error("GOOGLE_CLIENT_NOT_CONFIGURED");
+  if (isGoogleConnected()) return { access_token: accessToken };
   await loadGoogleIdentityServices();
   return new Promise((resolve, reject) => {
-    tokenClient ||= window.google.accounts.oauth2.initTokenClient({ client_id: CONFIG.clientId, scope: SCOPE, callback: () => {} });
-    tokenClient.callback = (response) => {
-      if (response.error) {
-        reject(new Error(response.error));
-        return;
-      }
-      accessToken = response.access_token;
-      resolve(response);
+    let settled = false;
+    const finish = (handler, value) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      handler(value);
     };
-    tokenClient.requestAccessToken({ prompt: accessToken ? "" : "consent" });
+    const timeoutId = window.setTimeout(() => finish(reject, new Error("GOOGLE_OAUTH_TIMEOUT")), 120000);
+    const tokenClient = window.google.accounts.oauth2.initTokenClient({
+      client_id: CONFIG.clientId,
+      scope: SCOPE,
+      callback: (response) => {
+        if (response.error) return finish(reject, new Error(response.error));
+        saveAccessToken(response);
+        finish(resolve, response);
+      },
+      error_callback: (error) => finish(reject, new Error(error?.type || "GOOGLE_OAUTH_FAILED"))
+    });
+    try {
+      tokenClient.requestAccessToken({ prompt: "" });
+    } catch (error) {
+      finish(reject, error);
+    }
   });
 }
 
 export function disconnectGoogle() {
   if (accessToken && window.google?.accounts?.oauth2) window.google.accounts.oauth2.revoke(accessToken);
-  accessToken = "";
+  clearAccessToken();
 }
 
 export function isGoogleConnected() {
-  return Boolean(accessToken);
+  if (!accessToken || accessTokenExpiresAt <= Date.now()) {
+    clearAccessToken();
+    return false;
+  }
+  return true;
 }
 
 async function googleApi(url, options = {}) {
@@ -66,7 +113,7 @@ async function googleApi(url, options = {}) {
     ...options,
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json", ...(options.headers || {}) }
   });
-  if (response.status === 401) accessToken = "";
+  if (response.status === 401) clearAccessToken();
   if (!response.ok) {
     const details = await response.json().catch(() => ({}));
     const error = new Error(details.error?.message || `GOOGLE_API_${response.status}`);

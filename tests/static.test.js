@@ -34,6 +34,8 @@ test("Google Sheet 遠端儲存使用 OAuth 公開設定且不含私鑰", async 
   assert.match(html, /Google Sheet 遠端儲存/);
   assert.match(remote, /https:\/\/www\.googleapis\.com\/auth\/spreadsheets/);
   assert.match(remote, /valueInputOption=RAW/);
+  assert.match(remote, /sessionStorage\.setItem/);
+  assert.match(remote, /error_callback/);
   assert.match(workflow, /GOOGLE_OAUTH_CLIENT_ID/);
   assert.match(workflow, /GOOGLE_SHEETS_SPREADSHEET_ID/);
   assert.match(serviceWorker, /self\.skipWaiting\(\)/);

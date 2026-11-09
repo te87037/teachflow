@@ -356,7 +356,14 @@ $("#connect-google").addEventListener("click", async () => {
     await syncGoogleSheet();
   } catch (error) {
     console.error(error);
-    setConnectionStatus(error.message === "GOOGLE_CLIENT_NOT_CONFIGURED" ? "尚未設定 Google OAuth" : "Google 登入未完成");
+    const messages = {
+      GOOGLE_CLIENT_NOT_CONFIGURED: "尚未設定 Google OAuth",
+      popup_failed_to_open: "瀏覽器已封鎖登入彈窗",
+      popup_closed: "登入視窗已關閉",
+      GOOGLE_OAUTH_TIMEOUT: "登入逾時，請再試一次",
+      GOOGLE_SCRIPT_FAILED: "無法載入 Google 登入服務"
+    };
+    setConnectionStatus(messages[error.message] || "Google 登入未完成");
   }
 });
 $("#disconnect-google").addEventListener("click", () => { disconnectGoogle(); setConnectionStatus("本機已儲存"); });
@@ -367,5 +374,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
 load().then(async () => {
   $("#spreadsheet-id").value = await selectedSpreadsheetId();
-  setConnectionStatus(navigator.onLine ? (googleRemoteConfigured() ? "本機已儲存" : "尚未設定 Google OAuth") : "離線 · 本機已儲存");
+  const connected = isGoogleConnected();
+  setConnectionStatus(navigator.onLine ? (connected ? "同步中…" : googleRemoteConfigured() ? "本機已儲存" : "尚未設定 Google OAuth") : "離線 · 本機已儲存");
+  if (connected) void syncGoogleSheet();
 }).catch((error) => { console.error(error); showToast("資料庫啟動失敗，請重新整理", "⚠️"); });
