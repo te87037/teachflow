@@ -2,6 +2,7 @@ const CONFIG = window.__TEACHFLOW_GOOGLE_CONFIG__ || {};
 const ACCESS_CODE_KEY = "teachflow-sync-access-code";
 let bridgeFrame;
 let bridgeReady;
+let bridgeWindow;
 const pendingRequests = new Map();
 
 export function googleRemoteConfigured() {
@@ -34,12 +35,14 @@ function ensureBridge() {
   bridgeReady = new Promise((resolve, reject) => {
     const timeout = window.setTimeout(() => reject(new Error("BRIDGE_LOAD_TIMEOUT")), 30000);
     const onMessage = (event) => {
-      if (event.source !== bridgeFrame?.contentWindow) return;
       if (event.data?.type === "teachflow-bridge-ready") {
+        if (!event.origin.endsWith(".googleusercontent.com")) return;
+        bridgeWindow = event.source;
         window.clearTimeout(timeout);
         resolve();
         return;
       }
+      if (event.source !== bridgeWindow) return;
       if (event.data?.type !== "teachflow-sync-response") return;
       const pending = pendingRequests.get(event.data.requestId);
       if (!pending) return;
@@ -72,7 +75,7 @@ async function remoteApi(spreadsheetId, operations = []) {
       reject(new Error("SYNC_TIMEOUT"));
     }, 60000);
     pendingRequests.set(requestId, { resolve, reject, timeout });
-    bridgeFrame.contentWindow.postMessage({
+    bridgeWindow.postMessage({
       type: "teachflow-sync-request",
       requestId,
       payload: { secret, spreadsheetId, operations }

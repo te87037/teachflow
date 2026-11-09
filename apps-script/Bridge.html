@@ -22,7 +22,7 @@
       .syncTeachFlow(event.data.payload);
   });
 
-  parent.postMessage({ type: "teachflow-bridge-ready" }, PARENT_ORIGIN);
+  window.top.postMessage({ type: "teachflow-bridge-ready" }, PARENT_ORIGIN);
 </script>
 </body>
 </html>
