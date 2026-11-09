@@ -44,7 +44,7 @@ Google Cloud 專案需啟用 Google Sheets API，並設定 OAuth 同意畫面。
 ## 維護與資料
 
 - IndexedDB 名稱為 `teachflow`；資料庫版本目前為 1。
-- Service Worker cache 名稱為 `teachflow-v4`，安裝後立即接管既有分頁。更新靜態資源時應同步增加 cache 版本。
+- Service Worker cache 名稱為 `teachflow-v5`，安裝後立即接管既有分頁。更新靜態資源時應同步增加 cache 版本。
 - 資料模型變更必須先新增遷移，不得刪除 `syncQueue` 中尚未同步的操作。
 - 核心計算規則修改時，同步更新 spec.md、design.md、tests 與 acceptance.md。
 

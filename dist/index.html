@@ -2,116 +2,112 @@
 <html lang="zh-Hant-TW">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#173f5f">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#4338ca">
   <meta name="description" content="為台灣國高中教師設計的手機優先教學進度管理工具">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
-  <style>.hero-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.45rem}.hero-actions .ghost-button{min-height:38px;font-size:.75rem}</style>
   <title>TeachFlow 教學進度管家</title>
 </head>
 <body>
-  <div class="app-shell">
-    <header class="hero">
-      <div class="brand-row">
+  <div id="app" class="tf-shell">
+    <div id="toast" class="tf-toast" role="status" aria-live="polite"><span id="toast-icon">✓</span><span id="toast-message">已自動存檔</span></div>
+
+    <header class="tf-header">
+      <div class="row-between header-top">
         <div>
-          <p class="eyebrow">TEACHFLOW · 教學進度管家</p>
-          <h1>今天的課，心裡有底。</h1>
+          <div class="brand-line"><strong>TeachFlow 教學進度管家</strong><span class="version-badge">Pro v1.2</span></div>
+          <p class="header-meta"><span id="header-date">—</span><button id="connection-state" class="cloud-badge" type="button">本機已儲存</button></p>
         </div>
-        <div class="hero-actions">
-          <button id="cloud-button" class="ghost-button" type="button">連接 Google Sheet</button>
-          <button id="export-button" class="ghost-button" type="button">匯出 CSV</button>
+        <div class="header-actions">
+          <button id="swap-button" class="top-button" type="button"><span>🔄</span><span>調課</span></button>
+          <button id="export-button" class="top-button" type="button"><span>📊</span><span>匯出</span></button>
         </div>
       </div>
-      <div class="today-summary">
-        <div><span id="today-label">—</span><strong id="lesson-count">—</strong></div>
-        <span id="connection-state" class="status-pill">本機已儲存</span>
-      </div>
+      <nav class="tf-nav" aria-label="主要功能">
+        <button class="tab-button active" data-view="today">今日課堂</button>
+        <button class="tab-button" data-view="pace">段考配速</button>
+        <button class="tab-button" data-view="schedule">常規課表</button>
+        <button class="tab-button" data-view="import">AI 匯入</button>
+      </nav>
     </header>
 
-    <nav class="top-nav" aria-label="主要功能">
-      <button class="nav-button is-active" data-view="today">今日</button>
-      <button class="nav-button" data-view="pace">配速</button>
-      <button class="nav-button" data-view="history">紀錄</button>
-      <button class="nav-button" data-view="setup">設定</button>
-    </nav>
-
-    <main>
+    <main class="tf-main">
       <section id="view-today" class="view">
-        <div class="section-heading">
-          <div><p class="kicker">DAILY FLOW</p><h2>授課清單</h2></div>
-          <label class="date-control">查看日期<input id="selected-date" type="date"></label>
-        </div>
-        <div id="today-lessons" class="card-stack" aria-live="polite"></div>
+        <div class="day-switcher"><span>授課日切換：</span><div id="day-switcher-buttons"></div></div>
+        <div class="list-heading"><strong id="today-list-title">今日授課清單</strong><span>下課點選 +1 / +2 自動存檔</span></div>
+        <div id="today-lessons"></div>
       </section>
 
-      <section id="view-pace" class="view is-hidden">
-        <div class="section-heading">
-          <div><p class="kicker">EXAM PACE</p><h2>段考前的真實堂數</h2></div>
+      <section id="view-pace" class="view hidden">
+        <div class="exam-banner">
+          <div class="row-between"><span id="exam-title">段考目標</span><button id="exam-config-button" type="button">考試日：<span id="exam-date-label">—</span> ✏️</button></div>
+          <div class="exam-summary"><strong>倒數 <span id="exam-days-label">—</span> 天</strong><span>目標範圍：<b>P.<span id="exam-target-label">—</span></b></span></div>
+          <div class="exam-note"><span>扣除停課、活動與單次異動</span><span>已動態核算各班實質堂數</span></div>
         </div>
-        <p class="section-note">堂數由課表版本、補課、停課與單次異動展開計算；可點開日期核對。</p>
-        <div id="pace-list" class="card-stack"></div>
+        <div id="pace-list"></div>
       </section>
 
-      <section id="view-history" class="view is-hidden">
-        <div class="section-heading"><div><p class="kicker">TEACHING LOG</p><h2>歷史紀錄</h2></div></div>
-        <div class="filter-bar">
-          <input id="history-search" type="search" placeholder="搜尋班級、章節或備忘">
-          <select id="history-class"><option value="">全部班級</option></select>
-        </div>
-        <div id="history-list" class="card-stack"></div>
-      </section>
-
-      <section id="view-setup" class="view is-hidden">
-        <div class="section-heading"><div><p class="kicker">SEMESTER SETUP</p><h2>課表與資料</h2></div></div>
-        <article class="panel setup-panel">
-          <div><span class="step-number">01</span><h3>匯入課表／行事曆</h3></div>
-          <p>目前版本會先驗證檔案並建立「待核對批次」，不會直接改寫正式資料。真實 OCR 服務尚待伺服器端憑證設定。</p>
-          <label class="upload-zone">選擇 PDF、JPG 或 PNG<input id="import-file" type="file" accept="application/pdf,image/jpeg,image/png" multiple></label>
-          <div id="import-result"></div>
-        </article>
-        <article class="panel setup-panel">
-          <div><span class="step-number">02</span><h3>常規課表</h3></div>
-          <p>首版先提供可核對的週課表。課表版本編輯與原子對調仍在後續任務中。</p>
+      <section id="view-schedule" class="view hidden">
+        <article class="tf-card">
+          <div class="card-intro"><h2>每週常規授課課表</h2><p>點擊任一節次格子即可快速修改或新增授課班級</p></div>
           <div id="schedule-grid" class="schedule-grid"></div>
         </article>
-        <article class="panel setup-panel warning-panel">
-          <div><span class="step-number">03</span><h3>整合狀態</h3></div>
-          <ul class="status-list">
-            <li><span class="dot done"></span>離線快取與 IndexedDB 本機保存</li>
-            <li><span class="dot done"></span>Google 帳號授權與跨裝置時間戳合併</li>
-            <li><span class="dot pending"></span>真實 OCR／多模態辨識服務</li>
-            <li><span class="dot done"></span>Google Sheets 追加式列同步（部署設定後啟用）</li>
-          </ul>
+      </section>
+
+      <section id="view-import" class="view hidden">
+        <article class="tf-card">
+          <h2 class="import-title">📸 課表／行事曆智慧辨識</h2>
+          <p class="import-copy">直接上傳教務處發布的個人課表截圖或整學期行事曆，系統會先建立待核對批次，確認前不會修改正式資料。</p>
+          <div class="integration-box"><span>✨ 辨識服務狀態</span><strong>待設定伺服器端 OCR 憑證</strong><small>原始文件不會在此靜態部署中送往第三方服務</small></div>
+          <div class="upload-grid">
+            <label class="upload-button schedule-upload"><span>📅</span><b>匯入課表圖檔</b><small>JPG／PNG／PDF</small><input class="hidden" data-import-kind="schedule" type="file" accept="image/jpeg,image/png,application/pdf" multiple></label>
+            <label class="upload-button calendar-upload"><span>🏫</span><b>匯入學期行事曆</b><small>PDF／官方截圖</small><input class="hidden" data-import-kind="calendar" type="file" accept="image/jpeg,image/png,application/pdf" multiple></label>
+          </div>
+          <div id="import-result"></div>
         </article>
       </section>
     </main>
   </div>
 
-  <dialog id="record-dialog">
-    <form id="record-form" method="dialog">
-      <div class="dialog-heading"><div><p class="kicker">30 秒快記</p><h2 id="record-title">課堂紀錄</h2></div><button class="icon-button close-record-dialog" type="button" aria-label="關閉">×</button></div>
-      <input id="record-lesson-id" type="hidden">
-      <label>章節／主題<input id="record-chapter" required placeholder="例：第二課 權利與義務"></label>
-      <label>教材頁碼<div class="page-stepper"><button type="button" data-step="-1">−</button><input id="record-page" type="number" min="0" required><button type="button" data-step="1">+1</button><button type="button" data-step="2">+2</button></div></label>
-      <label>教學狀態<select id="record-status"><option value="completed">已講完</option><option value="review">待檢討</option><option value="partial">進行中</option></select></label>
-      <label>下次備忘<textarea id="record-memo" rows="3" placeholder="例：先檢討學習單第 3 題"></textarea></label>
-      <div class="dialog-actions"><button class="secondary-button close-record-dialog" type="button">取消</button><button id="save-record" class="primary-button" type="submit">儲存紀錄</button></div>
+  <dialog id="swap-dialog">
+    <form id="swap-form" method="dialog">
+      <div class="dialog-heading"><div><h2>🔄 課堂單次調換</h2><p>僅變更所選日期安排，不影響每週常規課表。</p></div><button class="icon-button dialog-close" type="button">×</button></div>
+      <label>要調動的節次<select id="swap-period" required></select></label>
+      <label>調換為哪一個班級？<select id="swap-class" required></select></label>
+      <div class="dialog-actions"><button class="cancel-button dialog-close" type="button">取消</button><button class="primary-button" type="submit">套用變更</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="schedule-dialog">
+    <form id="schedule-form" method="dialog">
+      <div class="dialog-heading"><div><h2>✏️ 設定每週常規排課</h2><p id="schedule-dialog-subtitle">—</p></div><button class="icon-button dialog-close" type="button">×</button></div>
+      <input id="schedule-weekday" type="hidden"><input id="schedule-period" type="hidden">
+      <label>授課班級<select id="schedule-class"><option value="">設為空堂</option></select></label>
+      <div class="dialog-actions"><button class="cancel-button dialog-close" type="button">取消</button><button class="primary-button" type="submit">儲存課表</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="exam-dialog">
+    <form id="exam-form" method="dialog">
+      <div class="dialog-heading"><div><h2>🎯 修改段考目標設定</h2></div><button class="icon-button dialog-close" type="button">×</button></div>
+      <label>段考目標頁碼（P.）<input id="exam-target" type="number" min="1" required></label>
+      <label>段考日期<input id="exam-date" type="date" required></label>
+      <div class="dialog-actions"><button class="cancel-button dialog-close" type="button">取消</button><button class="primary-button" type="submit">儲存設定</button></div>
     </form>
   </dialog>
 
   <dialog id="cloud-dialog">
     <form id="cloud-form" method="dialog">
-      <div class="dialog-heading"><div><p class="kicker">REMOTE STORAGE</p><h2>Google Sheet 遠端儲存</h2></div><button id="close-cloud-dialog" class="icon-button" type="button" aria-label="關閉">×</button></div>
-      <p class="section-note">登入後會把本機待同步資料追加到指定試算表的「TeachFlow資料」工作表，再下載其他裝置的較新版本。</p>
+      <div class="dialog-heading"><div><p class="dialog-kicker">REMOTE STORAGE</p><h2>Google Sheet 遠端儲存</h2></div><button id="close-cloud-dialog" class="icon-button" type="button">×</button></div>
+      <p class="dialog-copy">登入後會把本機待同步資料追加到指定試算表的「TeachFlow資料」工作表，再下載其他裝置的較新版本。</p>
       <label>Google Sheet 網址或試算表 ID<input id="spreadsheet-id" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/…"></label>
-      <p id="cloud-detail" class="section-note">尚未連接。</p>
-      <div class="dialog-actions"><button id="disconnect-google" class="secondary-button" type="button">中斷連線</button><button id="connect-google" class="primary-button" type="button">使用 Google 登入並同步</button></div>
+      <p id="cloud-detail" class="dialog-copy">尚未連接。</p>
+      <div class="dialog-actions"><button id="disconnect-google" class="cancel-button" type="button">中斷連線</button><button id="connect-google" class="primary-button" type="button">使用 Google 登入並同步</button></div>
     </form>
   </dialog>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./remote-config.js"></script>
   <script type="module" src="./app.js"></script>
 </body>

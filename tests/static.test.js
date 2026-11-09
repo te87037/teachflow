@@ -2,12 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-test("課堂紀錄的關閉與取消按鈕不會送出表單", async () => {
+test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
-  const closeButtons = [...html.matchAll(/<button[^>]*class="[^"]*close-record-dialog[^"]*"[^>]*>/g)].map((match) => match[0]);
-  assert.equal(closeButtons.length, 2);
-  for (const button of closeButtons) assert.match(button, /type="button"/);
-  assert.match(html, /id="save-record"[^>]*type="submit"/);
+  assert.match(html, />今日課堂<\/button>/);
+  assert.match(html, />段考配速<\/button>/);
+  assert.match(html, />常規課表<\/button>/);
+  assert.match(html, />AI 匯入<\/button>/);
+  const app = await readFile(new URL("../dist/app.js", import.meta.url), "utf8");
+  assert.match(app, /data-step="1"/);
+  assert.match(app, /data-step="2"/);
+  assert.match(app, /saveInlineRecord/);
 });
 
 test("Google Sheet 遠端儲存使用 OAuth 公開設定且不含私鑰", async () => {
