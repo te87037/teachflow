@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#173f5f">
+  <meta name="description" content="為台灣國高中教師設計的手機優先教學進度管理工具">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <title>TeachFlow 教學進度管家</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="brand-row">
+        <div>
+          <p class="eyebrow">TEACHFLOW · 教學進度管家</p>
+          <h1>今天的課，心裡有底。</h1>
+        </div>
+        <button id="export-button" class="ghost-button" type="button">匯出 CSV</button>
+      </div>
+      <div class="today-summary">
+        <div><span id="today-label">—</span><strong id="lesson-count">—</strong></div>
+        <span id="connection-state" class="status-pill">本機已儲存</span>
+      </div>
+    </header>
+
+    <nav class="top-nav" aria-label="主要功能">
+      <button class="nav-button is-active" data-view="today">今日</button>
+      <button class="nav-button" data-view="pace">配速</button>
+      <button class="nav-button" data-view="history">紀錄</button>
+      <button class="nav-button" data-view="setup">設定</button>
+    </nav>
+
+    <main>
+      <section id="view-today" class="view">
+        <div class="section-heading">
+          <div><p class="kicker">DAILY FLOW</p><h2>授課清單</h2></div>
+          <label class="date-control">查看日期<input id="selected-date" type="date"></label>
+        </div>
+        <div id="today-lessons" class="card-stack" aria-live="polite"></div>
+      </section>
+
+      <section id="view-pace" class="view is-hidden">
+        <div class="section-heading">
+          <div><p class="kicker">EXAM PACE</p><h2>段考前的真實堂數</h2></div>
+        </div>
+        <p class="section-note">堂數由課表版本、補課、停課與單次異動展開計算；可點開日期核對。</p>
+        <div id="pace-list" class="card-stack"></div>
+      </section>
+
+      <section id="view-history" class="view is-hidden">
+        <div class="section-heading"><div><p class="kicker">TEACHING LOG</p><h2>歷史紀錄</h2></div></div>
+        <div class="filter-bar">
+          <input id="history-search" type="search" placeholder="搜尋班級、章節或備忘">
+          <select id="history-class"><option value="">全部班級</option></select>
+        </div>
+        <div id="history-list" class="card-stack"></div>
+      </section>
+
+      <section id="view-setup" class="view is-hidden">
+        <div class="section-heading"><div><p class="kicker">SEMESTER SETUP</p><h2>課表與資料</h2></div></div>
+        <article class="panel setup-panel">
+          <div><span class="step-number">01</span><h3>匯入課表／行事曆</h3></div>
+          <p>目前版本會先驗證檔案並建立「待核對批次」，不會直接改寫正式資料。真實 OCR 服務尚待伺服器端憑證設定。</p>
+          <label class="upload-zone">選擇 PDF、JPG 或 PNG<input id="import-file" type="file" accept="application/pdf,image/jpeg,image/png" multiple></label>
+          <div id="import-result"></div>
+        </article>
+        <article class="panel setup-panel">
+          <div><span class="step-number">02</span><h3>常規課表</h3></div>
+          <p>首版先提供可核對的週課表。課表版本編輯與原子對調仍在後續任務中。</p>
+          <div id="schedule-grid" class="schedule-grid"></div>
+        </article>
+        <article class="panel setup-panel warning-panel">
+          <div><span class="step-number">03</span><h3>整合狀態</h3></div>
+          <ul class="status-list">
+            <li><span class="dot done"></span>離線快取與 IndexedDB 本機保存</li>
+            <li><span class="dot pending"></span>帳號登入、雲端資料隔離與跨裝置衝突</li>
+            <li><span class="dot pending"></span>真實 OCR／多模態辨識服務</li>
+            <li><span class="dot pending"></span>Google Sheets OAuth 與列同步</li>
+          </ul>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="record-dialog">
+    <form id="record-form" method="dialog">
+      <div class="dialog-heading"><div><p class="kicker">30 秒快記</p><h2 id="record-title">課堂紀錄</h2></div><button class="icon-button" value="cancel" aria-label="關閉">×</button></div>
+      <input id="record-lesson-id" type="hidden">
+      <label>章節／主題<input id="record-chapter" required placeholder="例：第二課 權利與義務"></label>
+      <label>教材頁碼<div class="page-stepper"><button type="button" data-step="-1">−</button><input id="record-page" type="number" min="0" required><button type="button" data-step="1">+1</button><button type="button" data-step="2">+2</button></div></label>
+      <label>教學狀態<select id="record-status"><option value="completed">已講完</option><option value="review">待檢討</option><option value="partial">進行中</option></select></label>
+      <label>下次備忘<textarea id="record-memo" rows="3" placeholder="例：先檢討學習單第 3 題"></textarea></label>
+      <div class="dialog-actions"><button class="secondary-button" value="cancel">取消</button><button id="save-record" class="primary-button" value="default">儲存紀錄</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "teachflow",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check dist/app.js && node --check dist/db.js && node --check dist/engine.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "TeachFlow 教學進度管家",
+  "short_name": "TeachFlow",
+  "description": "台灣國高中教師的手機優先教學進度管理工具",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f2ea",
+  "theme_color": "#173f5f",
+  "lang": "zh-Hant-TW",
+  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
