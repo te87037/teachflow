@@ -50,7 +50,7 @@ Apps Script 專案的 Script Properties 保存 `TEACHFLOW_SYNC_SECRET` 與 `GOOG
 
 ## 已知限制
 
-- Google 存取權由該試算表的 Drive 權限控制；目前沒有產品自己的多使用者帳號或管理後台。
+- 首版固定為單一教師與單一 Google Sheet；瀏覽器以可輪替同步存取碼連線 Apps Script，沒有多使用者帳號或管理後台。
 - 匯入只完成前端檔案驗證與批次建立，沒有呼叫模擬或真實 OCR。
 - 課表目前只讀；尚未提供版本編輯、原子對調與撤銷 UI。
 - 同步存取碼保存在該裝置的 localStorage；共用或遺失的裝置應按「忘記存取碼」，必要時輪替 Apps Script 的 Script Property。

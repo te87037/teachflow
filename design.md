@@ -2,7 +2,7 @@
 
 ## 1. 架構
 
-目前可執行版本採無框架 PWA：`index.html + ES modules + IndexedDB + Service Worker + Google Identity Services + Google Sheets API`。核心計算放在純函式模組 `dist/engine.js`，UI、持久化與 Google 遠端介面分離。
+目前可執行版本採無框架 PWA：`index.html + ES modules + IndexedDB + Service Worker + Apps Script Web App + Google Sheets`。核心計算放在純函式模組 `dist/engine.js`，UI、持久化與 Google 遠端介面分離。
 
 目前架構：
 
@@ -13,7 +13,7 @@
 
 ## 2. 資料模型
 
-主要實體：User、Semester、Class、Subject、TeachingAssignment、Material、Period、ScheduleVersion、CalendarEvent、LessonException、LessonInstance、TeachingRecord、ExamTarget、ImportBatch、SyncOperation、SheetRowMapping。
+主要實體：Semester、Class、Subject、TeachingAssignment、Material、Period、ScheduleVersion、CalendarEvent、LessonException、LessonInstance、TeachingRecord、ExamTarget、ImportBatch、SyncOperation、SheetRowMapping。首版部署對應單一教師，不建立多使用者帳號模型。
 
 穩定鍵原則：班級名稱不是主鍵；授課實例 ID 由日期、節次與授課關聯 ID 組成；紀錄以 UUID 為主鍵並對 `lesson_instance_id` 建唯一約束。刪除預設軟刪除並保留版本資訊。
 
