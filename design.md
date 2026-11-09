@@ -7,8 +7,8 @@
 目前架構：
 
 1. PWA 客戶端：快記、課表、歷史、配速、匯入核對、離線佇列。
-2. Google Identity Services：由教師本人授權 Sheets scope，access token 僅保存在記憶體。
-3. Google Sheets API：將具 UUID 的 SyncOperation 追加到「TeachFlow資料」工作表；試算表 ACL 是遠端資料的授權邊界。
+2. Apps Script Web App：以隱藏 iframe 與 postMessage 建立跨網域橋接，驗證 GitHub Pages origin、裝置保存的 TeachFlow 同步存取碼、固定試算表 ID 與請求大小。
+3. Google Sheets：Apps Script 以擁有者身分將具 UUID 的 SyncOperation 追加到「TeachFlow資料」工作表；Script Properties 與後端存取碼形成授權邊界。
 4. 可替換辨識介面：未來由伺服器保存 OCR 金鑰；前端不得包含供應商密鑰。
 
 ## 2. 資料模型
@@ -43,8 +43,8 @@ IndexedDB 是離線工作集。每次本機寫入同時新增具 UUID 的 SyncOp
 
 ## 7. 安全
 
-- Google Sheets API 只接受 Google OAuth access token，存取範圍仍受試算表 ACL 限制。
-- OAuth client ID 與 spreadsheet ID 是公開部署設定；client secret、refresh token、服務帳戶私鑰與 OCR 金鑰不得進入前端、Git 或日誌。
+- Google Sheets 只由 Apps Script 擁有者身分呼叫，使用者瀏覽器不取得 Google access token。
+- Web App URL 與 spreadsheet ID 是公開部署設定；同步密鑰、服務帳戶私鑰與 OCR 金鑰不得進入前端、Git 或日誌。
 - 上傳限制 MIME、真實檔頭、大小、頁數、加密與損壞狀態。
 - CSV 公式注入防護；畫面輸出 HTML escaping；CSP 與安全標頭在 Worker 階段加入。
 - 原始文件預設短期保存，正式政策與刪除入口在 OCR 上線前完成。

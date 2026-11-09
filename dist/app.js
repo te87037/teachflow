@@ -75,7 +75,7 @@ async function syncGoogleSheet() {
     setConnectionStatus("雲端已同步");
   } catch (error) {
     console.error(error);
-    if (error.status === 401) setConnectionStatus("授權已到期");
+    if (error.status === 401) setConnectionStatus("同步存取碼無效");
     else if (error.status === 403) setConnectionStatus("Sheet 無存取權");
     else if (error.status === 404) setConnectionStatus("找不到 Sheet");
     else setConnectionStatus("同步失敗");
@@ -345,28 +345,28 @@ $("#exam-config-button").addEventListener("click", openExamDialog);
 $("#exam-form").addEventListener("submit", saveExam);
 $("#connection-state").addEventListener("click", async () => {
   $("#spreadsheet-id").value = await selectedSpreadsheetId();
-  if (!googleRemoteConfigured()) setConnectionStatus("尚未設定 Google OAuth");
+  $("#sync-access-code").value = "";
+  if (!googleRemoteConfigured()) setConnectionStatus("尚未設定雲端後端");
   $("#cloud-dialog").showModal();
 });
 $("#close-cloud-dialog").addEventListener("click", () => $("#cloud-dialog").close());
 $("#connect-google").addEventListener("click", async () => {
   try {
-    setConnectionStatus("等待 Google 授權…");
-    await connectGoogle();
+    setConnectionStatus("正在連接安全後端…");
+    await connectGoogle($("#sync-access-code").value);
+    $("#sync-access-code").value = "";
     await syncGoogleSheet();
   } catch (error) {
     console.error(error);
     const messages = {
-      GOOGLE_CLIENT_NOT_CONFIGURED: "尚未設定 Google OAuth",
-      popup_failed_to_open: "瀏覽器已封鎖登入彈窗",
-      popup_closed: "登入視窗已關閉",
-      GOOGLE_OAUTH_TIMEOUT: "登入逾時，請再試一次",
-      GOOGLE_SCRIPT_FAILED: "無法載入 Google 登入服務"
+      REMOTE_NOT_CONFIGURED: "尚未設定雲端後端",
+      REMOTE_AUTH_REQUIRED: "請輸入同步存取碼",
+      INVALID_SYNC_SECRET: "同步存取碼錯誤"
     };
-    setConnectionStatus(messages[error.message] || "Google 登入未完成");
+    setConnectionStatus(messages[error.message] || (error.status === 401 ? "同步存取碼錯誤" : "後端連線失敗"));
   }
 });
-$("#disconnect-google").addEventListener("click", () => { disconnectGoogle(); setConnectionStatus("本機已儲存"); });
+$("#disconnect-google").addEventListener("click", () => { disconnectGoogle(); $("#sync-access-code").value = ""; setConnectionStatus("本機已儲存"); });
 window.addEventListener("online", () => { setConnectionStatus(isGoogleConnected() ? "同步中…" : "本機已儲存"); void syncGoogleSheet(); });
 window.addEventListener("offline", () => setConnectionStatus("離線 · 本機已儲存"));
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") void syncGoogleSheet(); });
@@ -375,6 +375,6 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
 load().then(async () => {
   $("#spreadsheet-id").value = await selectedSpreadsheetId();
   const connected = isGoogleConnected();
-  setConnectionStatus(navigator.onLine ? (connected ? "同步中…" : googleRemoteConfigured() ? "本機已儲存" : "尚未設定 Google OAuth") : "離線 · 本機已儲存");
+  setConnectionStatus(navigator.onLine ? (connected ? "同步中…" : googleRemoteConfigured() ? "本機已儲存" : "尚未設定雲端後端") : "離線 · 本機已儲存");
   if (connected) void syncGoogleSheet();
 }).catch((error) => { console.error(error); showToast("資料庫啟動失敗，請重新整理", "⚠️"); });

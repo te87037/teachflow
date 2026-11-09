@@ -102,10 +102,11 @@
   <dialog id="cloud-dialog">
     <form id="cloud-form" method="dialog">
       <div class="dialog-heading"><div><p class="dialog-kicker">REMOTE STORAGE</p><h2>Google Sheet 遠端儲存</h2></div><button id="close-cloud-dialog" class="icon-button" type="button">×</button></div>
-      <p class="dialog-copy">登入後會把本機待同步資料追加到指定試算表的「TeachFlow資料」工作表，再下載其他裝置的較新版本。</p>
-      <label>Google Sheet 網址或試算表 ID<input id="spreadsheet-id" autocomplete="off" placeholder="https://docs.google.com/spreadsheets/d/…"></label>
+      <p class="dialog-copy">輸入一次 TeachFlow 同步存取碼後，本機資料會透過安全後端寫入「TeachFlow資料」工作表；之後開啟網站會自動同步，不必重複登入 Google。</p>
+      <label>Google Sheet 網址或試算表 ID<input id="spreadsheet-id" autocomplete="off" readonly></label>
+      <label>TeachFlow 同步存取碼<input id="sync-access-code" type="password" autocomplete="current-password" placeholder="每台裝置只需輸入一次"></label>
       <p id="cloud-detail" class="dialog-copy">尚未連接。</p>
-      <div class="dialog-actions"><button id="disconnect-google" class="cancel-button" type="button">中斷連線</button><button id="connect-google" class="primary-button" type="button">使用 Google 登入並同步</button></div>
+      <div class="dialog-actions"><button id="disconnect-google" class="cancel-button" type="button">忘記存取碼</button><button id="connect-google" class="primary-button" type="button">連線並同步</button></div>
     </form>
   </dialog>
 

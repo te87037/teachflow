@@ -23,22 +23,27 @@ test("介面會依手機、平板與桌機寬度切換欄數", async () => {
   assert.match(responsive, /repeat\(3,\s*minmax\(0,\s*1fr\)\)/);
 });
 
-test("Google Sheet 遠端儲存使用 OAuth 公開設定且不含私鑰", async () => {
-  const [html, remote, workflow, serviceWorker] = await Promise.all([
+test("Google Sheet 遠端儲存透過 Apps Script 安全橋接且不把 Google 憑證送到前端", async () => {
+  const [html, remote, pagesWorkflow, appsScript, bridge, serviceWorker] = await Promise.all([
     readFile(new URL("../dist/index.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/remote.js", import.meta.url), "utf8"),
     readFile(new URL("../.github/workflows/pages.yml", import.meta.url), "utf8"),
+    readFile(new URL("../apps-script/Code.gs", import.meta.url), "utf8"),
+    readFile(new URL("../apps-script/Bridge.html", import.meta.url), "utf8"),
     readFile(new URL("../dist/sw.js", import.meta.url), "utf8")
   ]);
   assert.match(html, /remote-config\.js/);
   assert.match(html, /Google Sheet 遠端儲存/);
-  assert.match(remote, /https:\/\/www\.googleapis\.com\/auth\/spreadsheets/);
-  assert.match(remote, /valueInputOption=RAW/);
-  assert.match(remote, /sessionStorage\.setItem/);
-  assert.match(remote, /error_callback/);
-  assert.match(workflow, /GOOGLE_OAUTH_CLIENT_ID/);
-  assert.match(workflow, /GOOGLE_SHEETS_SPREADSHEET_ID/);
+  assert.match(html, /TeachFlow 同步存取碼/);
+  assert.match(remote, /localStorage\.setItem/);
+  assert.match(remote, /teachflow-sync-request/);
+  assert.match(pagesWorkflow, /TEACHFLOW_SYNC_BRIDGE_URL/);
+  assert.match(pagesWorkflow, /GOOGLE_SHEETS_SPREADSHEET_ID/);
+  assert.match(appsScript, /PropertiesService\.getScriptProperties/);
+  assert.match(appsScript, /SpreadsheetApp\.openById/);
+  assert.match(appsScript, /LockService\.getScriptLock/);
+  assert.match(bridge, /event\.origin !== PARENT_ORIGIN/);
   assert.match(serviceWorker, /self\.skipWaiting\(\)/);
   assert.match(serviceWorker, /self\.clients\.claim\(\)/);
-  assert.doesNotMatch(`${html}\n${remote}\n${workflow}`, /client_secret|private_key|service[_-]role/i);
+  assert.doesNotMatch(`${html}\n${remote}\n${pagesWorkflow}`, /client_secret|private_key|BEGIN PRIVATE KEY/i);
 });

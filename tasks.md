@@ -10,10 +10,10 @@
 - [x] TASK-006（FR-009）完成段考配速與剩餘堂次明細 UI。
 - [x] TASK-007（FR-014）完成歷史篩選與安全 CSV 匯出。
 - [~] TASK-008（FR-010）完成檔案格式／大小檢查與待核對批次；待接真實 OCR、Schema、來源對照、確認套用與回滾。
-- [~] TASK-009（FR-011～FR-012）完成本機待同步佇列、Google Sheet 追加、操作 ID 去重與跨裝置時間戳合併；待真實 OAuth 設定後做雙裝置整合測試。
-- [~] TASK-010（FR-015、AC-012）完成 Google OAuth 授權流程；待真實 Sheet ACL 雙帳號測試。
+- [~] TASK-009（FR-011～FR-012）完成本機待同步佇列、Apps Script／Google Sheet 追加、操作 ID 去重與跨裝置時間戳合併；待正式後端部署後做雙裝置整合測試。
+- [~] TASK-010（FR-015、AC-012）完成 Apps Script 同步存取碼驗證；待真實後端測試。
 - [ ] TASK-011 完成課表版本編輯、原子對調、代課／加課／停課與撤銷 UI。
 - [ ] TASK-012 完成正式 OCR 供應商介面、多頁 PDF、人工標註集與準確率報告。
-- [~] TASK-013 完成 Google Sheets OAuth、追加式操作列、離線重試與授權失效提示；待設定正式 Client ID／Sheet ID 並實測。
+- [~] TASK-013 完成 Apps Script 安全橋接、追加式操作列、離線重試與存取碼失效提示；待部署後實測。
 - [ ] TASK-014 完成備份還原、列印 PDF、資料遷移與未同步資料保護測試。
 - [x] TASK-015 推送 GitHub、啟用 GitHub Pages 自動部署並驗證 `github.io` 網址。

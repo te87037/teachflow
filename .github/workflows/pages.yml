@@ -27,12 +27,12 @@ jobs:
       - name: Run core tests
         run: node --test
 
-      - name: Configure Google Sheets remote storage
+      - name: Configure secure remote storage
         env:
-          GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
+          TEACHFLOW_SYNC_BRIDGE_URL: ${{ vars.TEACHFLOW_SYNC_BRIDGE_URL }}
           GOOGLE_SHEETS_SPREADSHEET_ID: ${{ vars.GOOGLE_SHEETS_SPREADSHEET_ID }}
         run: >-
-          node -e "const fs=require('fs');const config={clientId:process.env.GOOGLE_OAUTH_CLIENT_ID||'',spreadsheetId:process.env.GOOGLE_SHEETS_SPREADSHEET_ID||''};fs.writeFileSync('dist/remote-config.js','window.__TEACHFLOW_GOOGLE_CONFIG__ = '+JSON.stringify(config)+';\n')"
+          node -e "const fs=require('fs');const config={apiUrl:process.env.TEACHFLOW_SYNC_BRIDGE_URL||'',spreadsheetId:process.env.GOOGLE_SHEETS_SPREADSHEET_ID||''};fs.writeFileSync('dist/remote-config.js','window.__TEACHFLOW_GOOGLE_CONFIG__ = '+JSON.stringify(config)+';\n')"
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

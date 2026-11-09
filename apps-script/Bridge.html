@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head><base target="_top"><meta charset="utf-8"></head>
+<body>
+<script>
+  const PARENT_ORIGIN = "https://te87037.github.io";
+
+  window.addEventListener("message", (event) => {
+    if (event.origin !== PARENT_ORIGIN || event.data?.type !== "teachflow-sync-request") return;
+    const requestId = event.data.requestId;
+    google.script.run
+      .withSuccessHandler((result) => {
+        event.source.postMessage({ type: "teachflow-sync-response", requestId, result }, event.origin);
+      })
+      .withFailureHandler((error) => {
+        event.source.postMessage({
+          type: "teachflow-sync-response",
+          requestId,
+          error: String(error?.message || error || "SYNC_FAILED")
+        }, event.origin);
+      })
+      .syncTeachFlow(event.data.payload);
+  });
+
+  parent.postMessage({ type: "teachflow-bridge-ready" }, PARENT_ORIGIN);
+</script>
+</body>
+</html>
