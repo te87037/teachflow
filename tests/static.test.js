@@ -47,3 +47,27 @@ test("Google Sheet 遠端儲存透過 Apps Script 安全橋接且不把 Google �
   assert.match(serviceWorker, /self\.clients\.claim\(\)/);
   assert.doesNotMatch(`${html}\n${remote}\n${pagesWorkflow}`, /client_secret|private_key|BEGIN PRIVATE KEY/i);
 });
+
+test("OCR 使用 PDF.js、Apps Script Drive OCR 與人工核對後套用", async () => {
+  const [html, app, ocr, db, appsScript, bridge, manifest, serviceWorker] = await Promise.all([
+    readFile(new URL("../dist/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../dist/app.js", import.meta.url), "utf8"),
+    readFile(new URL("../dist/ocr.js", import.meta.url), "utf8"),
+    readFile(new URL("../dist/db.js", import.meta.url), "utf8"),
+    readFile(new URL("../apps-script/Code.gs", import.meta.url), "utf8"),
+    readFile(new URL("../apps-script/Bridge.html", import.meta.url), "utf8"),
+    readFile(new URL("../apps-script/appsscript.json", import.meta.url), "utf8"),
+    readFile(new URL("../dist/sw.js", import.meta.url), "utf8")
+  ]);
+  assert.match(html, /Google Drive OCR 已啟用/);
+  assert.match(ocr, /pdf\.worker\.mjs/);
+  assert.match(ocr, /MAX_PAGES_PER_BATCH/);
+  assert.match(app, /pending-review/);
+  assert.match(app, /commitImportBatch/);
+  assert.match(db, /transaction\(stores, "readwrite"\)/);
+  assert.match(appsScript, /recognizeTeachFlowPage/);
+  assert.match(appsScript, /setTrashed\(true\)/);
+  assert.match(bridge, /teachflow-ocr-request/);
+  assert.match(manifest, /"serviceId": "drive"/);
+  assert.match(serviceWorker, /ocr-parser\.js/);
+});

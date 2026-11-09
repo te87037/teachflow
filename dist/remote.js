@@ -43,7 +43,7 @@ function ensureBridge() {
         return;
       }
       if (event.source !== bridgeWindow) return;
-      if (event.data?.type !== "teachflow-sync-response") return;
+      if (!["teachflow-sync-response", "teachflow-ocr-response"].includes(event.data?.type)) return;
       const pending = pendingRequests.get(event.data.requestId);
       if (!pending) return;
       pendingRequests.delete(event.data.requestId);
@@ -63,25 +63,34 @@ function ensureBridge() {
   return bridgeReady;
 }
 
-async function remoteApi(spreadsheetId, operations = []) {
-  if (!googleRemoteConfigured()) throw new Error("REMOTE_NOT_CONFIGURED");
+async function bridgeRequest(type, payload, timeoutMs = 60000) {
+  if (!CONFIG.apiUrl) throw new Error("REMOTE_NOT_CONFIGURED");
   const secret = accessCode();
   if (!secret) throw Object.assign(new Error("REMOTE_AUTH_REQUIRED"), { status: 401 });
   await ensureBridge();
   const requestId = crypto.randomUUID();
-  const response = await new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const timeout = window.setTimeout(() => {
       pendingRequests.delete(requestId);
-      reject(new Error("SYNC_TIMEOUT"));
-    }, 60000);
+      reject(new Error(type === "teachflow-ocr-request" ? "OCR_TIMEOUT" : "SYNC_TIMEOUT"));
+    }, timeoutMs);
     pendingRequests.set(requestId, { resolve, reject, timeout });
     bridgeWindow.postMessage({
-      type: "teachflow-sync-request",
+      type,
       requestId,
-      payload: { secret, spreadsheetId, operations }
+      payload: { secret, ...payload }
     }, "*");
   });
+}
+
+async function remoteApi(spreadsheetId, operations = []) {
+  if (!googleRemoteConfigured()) throw new Error("REMOTE_NOT_CONFIGURED");
+  const response = await bridgeRequest("teachflow-sync-request", { spreadsheetId, operations });
   return response.operations || [];
+}
+
+export async function recognizeOcrPage(page) {
+  return bridgeRequest("teachflow-ocr-request", { page }, 120000);
 }
 
 export async function connectGoogle(code) {

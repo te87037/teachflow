@@ -6,20 +6,25 @@
   const PARENT_ORIGIN = "https://te87037.github.io";
 
   window.addEventListener("message", (event) => {
-    if (event.origin !== PARENT_ORIGIN || event.data?.type !== "teachflow-sync-request") return;
+    if (event.origin !== PARENT_ORIGIN) return;
+    const isSync = event.data?.type === "teachflow-sync-request";
+    const isOcr = event.data?.type === "teachflow-ocr-request";
+    if (!isSync && !isOcr) return;
     const requestId = event.data.requestId;
-    google.script.run
+    const responseType = isOcr ? "teachflow-ocr-response" : "teachflow-sync-response";
+    const runner = google.script.run
       .withSuccessHandler((result) => {
-        event.source.postMessage({ type: "teachflow-sync-response", requestId, result }, event.origin);
+        event.source.postMessage({ type: responseType, requestId, result }, event.origin);
       })
       .withFailureHandler((error) => {
         event.source.postMessage({
-          type: "teachflow-sync-response",
+          type: responseType,
           requestId,
-          error: String(error?.message || error || "SYNC_FAILED")
+          error: String(error?.message || error || (isOcr ? "OCR_FAILED" : "SYNC_FAILED"))
         }, event.origin);
-      })
-      .syncTeachFlow(event.data.payload);
+      });
+    if (isOcr) runner.recognizeTeachFlowPage(event.data.payload);
+    else runner.syncTeachFlow(event.data.payload);
   });
 
   window.top.postMessage({ type: "teachflow-bridge-ready" }, PARENT_ORIGIN);

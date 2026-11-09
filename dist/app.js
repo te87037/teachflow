@@ -1,8 +1,10 @@
-import { BUSINESS_STORES, all, applyRemoteOperations, exportSnapshot, getSetting, put, remove, seedIfEmpty } from "./db.js";
+import { BUSINESS_STORES, all, applyRemoteOperations, commitImportBatch, exportSnapshot, getSetting, put, remove, seedIfEmpty } from "./db.js";
 import { addDays, dateKey, expandLessons, latestProgress, pace, remainingLessons, weekdayOf } from "./engine.js";
-import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations } from "./remote.js";
+import { prepareImportPages } from "./ocr.js";
+import { parseImportCandidates } from "./ocr-parser.js";
+import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations, recognizeOcrPage } from "./remote.js";
 
-const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], lessons: [], selectedDate: dateKey() };
+const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], importBatches: [], lessons: [], selectedDate: dateKey() };
 const weekdays = ["", "一", "二", "三", "四", "五", "六", "日"];
 const $ = (selector) => document.querySelector(selector);
 const byId = (items, id) => items.find((item) => item.id === id);
@@ -12,8 +14,8 @@ let toastTimer;
 
 async function load({ seed = true } = {}) {
   if (seed) await seedIfEmpty();
-  [state.classes, state.subjects, state.materials, state.periods, state.scheduleVersions, state.events, state.exceptions, state.records, state.targets] = await Promise.all([
-    all("classes"), all("subjects"), all("materials"), all("periods"), all("scheduleVersions"), all("calendarEvents"), all("exceptions"), all("records"), all("examTargets")
+  [state.classes, state.subjects, state.materials, state.periods, state.scheduleVersions, state.events, state.exceptions, state.records, state.targets, state.importBatches] = await Promise.all([
+    all("classes"), all("subjects"), all("materials"), all("periods"), all("scheduleVersions"), all("calendarEvents"), all("exceptions"), all("records"), all("examTargets"), all("importBatches")
   ]);
   const start = state.scheduleVersions.map((item) => item.effectiveFrom).sort()[0] || state.selectedDate;
   const end = state.scheduleVersions.map((item) => item.effectiveTo).filter(Boolean).sort().at(-1) || state.selectedDate;
@@ -187,10 +189,62 @@ function renderSchedule() {
   $("#schedule-grid").querySelectorAll(".grid-cell").forEach((cell) => cell.addEventListener("click", () => openScheduleDialog(Number(cell.dataset.weekday), cell.dataset.periodId)));
 }
 
+function selectedOption(value, current) {
+  return String(value) === String(current ?? "") ? " selected" : "";
+}
+
+function renderImport() {
+  const container = $("#import-result");
+  const batch = [...state.importBatches].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))[0];
+  if (!batch) {
+    container.innerHTML = `<div class="import-empty">上傳後會在這裡顯示逐頁原文與待核對欄位。</div>`;
+    return;
+  }
+  if (batch.status === "processing") {
+    container.innerHTML = `<div class="import-batch import-processing"><strong>正在辨識 ${escapeHtml(batch.files?.map((file) => file.name).join("、") || "文件")}…</strong><span>${escapeHtml(batch.progress || "準備檔案")}</span></div>`;
+    return;
+  }
+  if (batch.status === "failed") {
+    container.innerHTML = `<div class="import-batch import-error"><strong>辨識失敗</strong><span>${escapeHtml(batch.error || "請重新選擇檔案")}</span></div>`;
+    return;
+  }
+  if (batch.status !== "pending-review") {
+    container.innerHTML = `<div class="import-batch"><strong>${batch.status === "applied" ? "✓ 最近一次匯入已套用" : "最近一次匯入已取消"}</strong><span>${escapeHtml(batch.files?.map((file) => file.name).join("、") || "")}</span></div>`;
+    return;
+  }
+  const candidates = batch.result?.candidates || [];
+  const cards = candidates.map((candidate) => {
+    if (batch.kind === "schedule") {
+      const matchedClass = state.classes.find((item) => item.name.replace(/\s/g, "").includes(String(candidate.className || "").replace(/\s/g, "")));
+      candidate.classId ||= matchedClass?.id || null;
+      candidate.periodId ||= state.periods.find((item) => item.order === candidate.period)?.id || null;
+      return `<article class="review-item" data-candidate-id="${candidate.id}">
+        <div class="review-source"><b>第 ${candidate.sourcePage} 頁</b><span>${escapeHtml(candidate.sourceText)}</span></div>
+        <div class="review-fields three-columns">
+          <label>星期<select data-field="weekday"><option value="">請選擇</option>${[1,2,3,4,5,6,7].map((day) => `<option value="${day}"${selectedOption(day, candidate.weekday)}>週${weekdays[day]}</option>`).join("")}</select></label>
+          <label>節次<select data-field="periodId"><option value="">請選擇</option>${state.periods.map((period) => `<option value="${period.id}"${selectedOption(period.id, candidate.periodId)}>${escapeHtml(period.label)}</option>`).join("")}</select></label>
+          <label>班級<select data-field="classId"><option value="">請選擇</option>${state.classes.map((item) => `<option value="${item.id}"${selectedOption(item.id, candidate.classId)}>${escapeHtml(item.name)}</option>`).join("")}</select></label>
+        </div>
+      </article>`;
+    }
+    return `<article class="review-item" data-candidate-id="${candidate.id}">
+      <div class="review-source"><b>第 ${candidate.sourcePage} 頁</b><span>${escapeHtml(candidate.sourceText)}</span></div>
+      <div class="review-fields calendar-fields">
+        <label>日期<input data-field="date" type="date" value="${escapeHtml(candidate.date || "")}"></label>
+        <label>類型<select data-field="eventType"><option value="event"${selectedOption("event", candidate.eventType)}>活動／停課</option><option value="exam"${selectedOption("exam", candidate.eventType)}>考試</option><option value="holiday"${selectedOption("holiday", candidate.eventType)}>放假</option><option value="makeup"${selectedOption("makeup", candidate.eventType)}>補課</option></select></label>
+        <label class="title-field">名稱<input data-field="title" value="${escapeHtml(candidate.title || "")}" placeholder="例如：第一次段考"></label>
+        <label>補課對應<select data-field="mappedWeekday"><option value="">不適用</option>${[1,2,3,4,5].map((day) => `<option value="${day}"${selectedOption(day, candidate.mappedWeekday)}>週${weekdays[day]}</option>`).join("")}</select></label>
+      </div>
+    </article>`;
+  }).join("");
+  container.innerHTML = `<div class="import-review-heading"><div><strong>待核對 ${candidates.length} 筆</strong><span>OCR 可能有誤，確認後才會修改正式資料。</span></div><span>${escapeHtml(batch.provider || "混合辨識")}</span></div>${cards}<div class="import-actions"><button class="cancel-button" data-import-action="cancel" type="button">取消批次</button><button class="primary-button" data-import-action="apply" type="button">確認並套用</button></div>`;
+}
+
 function renderAll() {
   renderToday();
   renderPace();
   renderSchedule();
+  renderImport();
 }
 
 async function saveInlineRecord(lessonId, patch) {
@@ -215,18 +269,124 @@ async function saveInlineRecord(lessonId, patch) {
 
 async function handleImport(event) {
   const files = [...event.target.files];
-  const allowed = ["application/pdf", "image/jpeg", "image/png"];
-  const maxBytes = 15 * 1024 * 1024;
-  const invalid = files.find((file) => !allowed.includes(file.type) || file.size > maxBytes);
-  if (invalid) {
-    $("#import-result").innerHTML = `<div class="import-batch">無法建立批次：${escapeHtml(invalid.name)} 格式不符或超過 15 MB。</div>`;
-    return;
+  event.target.value = "";
+  if (!files.length) return;
+  const batch = { id: crypto.randomUUID(), kind: event.target.dataset.importKind, status: "processing", files: files.map((file) => ({ name: file.name, type: file.type, size: file.size })), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), provider: "Google Drive OCR + PDF.js", progress: "驗證檔案", result: null };
+  await put("importBatches", batch);
+  state.importBatches.push(batch);
+  renderImport();
+  const updateProgress = async (message) => {
+    batch.progress = message;
+    batch.updatedAt = new Date().toISOString();
+    await put("importBatches", batch);
+    renderImport();
+  };
+  try {
+    const preparedPages = await prepareImportPages(files, (message) => { void updateProgress(message); });
+    const pages = [];
+    for (const page of preparedPages) {
+      if (page.text) {
+        pages.push({ pageNumber: page.pageNumber, fileName: page.fileName, text: page.text, provider: page.provider });
+        continue;
+      }
+      await updateProgress(`Google Drive OCR：第 ${page.pageNumber}/${preparedPages.length} 頁…`);
+      const result = await recognizeOcrPage(page);
+      pages.push({ pageNumber: page.pageNumber, fileName: page.fileName, text: result.text || "", provider: result.provider, digest: result.digest });
+    }
+    batch.status = "pending-review";
+    batch.progress = null;
+    batch.updatedAt = new Date().toISOString();
+    batch.result = { pages, candidates: parseImportCandidates(batch.kind, pages, state.classes) };
+    await put("importBatches", batch);
+    await queueEntity("importBatches", batch);
+    renderImport();
+    showToast(`辨識完成，請核對 ${batch.result.candidates.length} 筆`, "✨");
+    void syncGoogleSheet();
+  } catch (error) {
+    console.error(error);
+    batch.status = "failed";
+    batch.error = ({ REMOTE_AUTH_REQUIRED: "圖片 OCR 前請先按上方雲端狀態，輸入同步存取碼。", INVALID_SYNC_SECRET: "同步存取碼無效。", OCR_PAGE_TOO_LARGE: "單頁影像過大，請降低解析度。" })[error.message] || error.message || "辨識失敗";
+    batch.updatedAt = new Date().toISOString();
+    await put("importBatches", batch);
+    renderImport();
+    showToast("OCR 辨識失敗", "⚠️");
   }
-  const batch = { id: crypto.randomUUID(), kind: event.target.dataset.importKind, status: "pending-review", files: files.map((file) => ({ name: file.name, type: file.type, size: file.size })), createdAt: new Date().toISOString(), provider: null, result: null };
+}
+
+function activeImportBatch() {
+  return [...state.importBatches].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))).find((item) => item.status === "pending-review");
+}
+
+async function updateImportCandidate(target) {
+  const batch = activeImportBatch();
+  const card = target.closest("[data-candidate-id]");
+  if (!batch || !card) return;
+  const candidate = batch.result.candidates.find((item) => item.id === card.dataset.candidateId);
+  if (!candidate) return;
+  const field = target.dataset.field;
+  candidate[field] = ["weekday", "mappedWeekday"].includes(field) ? (target.value ? Number(target.value) : null) : target.value;
+  candidate.pendingReason = null;
+  batch.updatedAt = new Date().toISOString();
+  await put("importBatches", batch);
+}
+
+async function cancelImportBatch() {
+  const batch = activeImportBatch();
+  if (!batch) return;
+  batch.status = "cancelled";
+  batch.updatedAt = new Date().toISOString();
   await put("importBatches", batch);
   await queueEntity("importBatches", batch);
-  $("#import-result").innerHTML = `<div class="import-batch"><strong>✓ 已建立待核對批次</strong><br>${files.map((file) => escapeHtml(file.name)).join("、")}<br>尚未套用正式資料；辨識服務待伺服器端憑證設定。</div>`;
-  showToast("匯入批次已建立", "✨");
+  renderImport();
+  showToast("匯入批次已取消");
+  void syncGoogleSheet();
+}
+
+async function applyImportBatch() {
+  const batch = activeImportBatch();
+  if (!batch) return;
+  const candidates = batch.result?.candidates || [];
+  let changes = [];
+  if (batch.kind === "schedule") {
+    if (candidates.some((item) => !item.weekday || !item.periodId || !item.classId)) return showToast("請完成所有星期、節次與班級欄位", "⚠️");
+    const version = state.scheduleVersions[0];
+    if (!version) return showToast("找不到可更新的課表版本", "⚠️");
+    const assignments = [...version.assignments];
+    for (const candidate of candidates) {
+      const index = assignments.findIndex((item) => item.weekday === candidate.weekday && item.periodId === candidate.periodId);
+      const klass = byId(state.classes, candidate.classId);
+      const next = {
+        id: index >= 0 ? assignments[index].id : `assignment-${crypto.randomUUID()}`,
+        weekday: candidate.weekday,
+        periodId: candidate.periodId,
+        classId: candidate.classId,
+        grade: klass?.grade,
+        subjectId: assignments[index]?.subjectId || state.subjects[0]?.id,
+        materialId: assignments[index]?.materialId || state.materials[0]?.id
+      };
+      if (index >= 0) assignments[index] = next; else assignments.push(next);
+    }
+    changes = [{ store: "scheduleVersions", entity: { ...version, assignments, updatedAt: new Date().toISOString() } }];
+  } else {
+    if (candidates.some((item) => !item.date || !item.title)) return showToast("請完成所有日期與名稱欄位", "⚠️");
+    changes = candidates.map((candidate) => ({
+      store: "calendarEvents",
+      entity: {
+        id: `import-event-${candidate.id}`,
+        type: candidate.eventType || "event",
+        title: candidate.title,
+        startDate: candidate.date,
+        endDate: candidate.date,
+        mappedWeekday: candidate.eventType === "makeup" ? candidate.mappedWeekday || null : null,
+        blocksTeaching: candidate.eventType !== "makeup",
+        sourceImportBatchId: batch.id,
+        updatedAt: new Date().toISOString()
+      }
+    }));
+  }
+  await commitImportBatch(batch, changes);
+  await load({ seed: false });
+  showToast(`已套用 ${candidates.length} 筆匯入資料`, "✓");
   void syncGoogleSheet();
 }
 
@@ -336,6 +496,12 @@ document.querySelectorAll(".tab-button").forEach((button) => button.addEventList
   renderAll();
 }));
 document.querySelectorAll("[data-import-kind]").forEach((input) => input.addEventListener("change", handleImport));
+$("#import-result").addEventListener("change", (event) => { if (event.target.matches("[data-field]")) void updateImportCandidate(event.target); });
+$("#import-result").addEventListener("click", (event) => {
+  const action = event.target.closest("[data-import-action]")?.dataset.importAction;
+  if (action === "cancel") void cancelImportBatch();
+  if (action === "apply") void applyImportBatch();
+});
 document.querySelectorAll(".dialog-close").forEach((button) => button.addEventListener("click", () => button.closest("dialog").close()));
 $("#export-button").addEventListener("click", exportCsv);
 $("#swap-button").addEventListener("click", openSwapDialog);

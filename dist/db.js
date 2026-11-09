@@ -85,6 +85,28 @@ export async function applyRemoteOperations(operations) {
   });
 }
 
+export async function commitImportBatch(batch, changes) {
+  const changeStores = [...new Set(changes.map((item) => item.store))];
+  if (changeStores.some((name) => !BUSINESS_STORES.includes(name))) throw new Error("INVALID_IMPORT_STORE");
+  const db = await openDatabase();
+  const stores = [...new Set(["importBatches", "syncQueue", ...changeStores])];
+  const transaction = db.transaction(stores, "readwrite");
+  const updatedAt = new Date().toISOString();
+  const appliedBatch = { ...batch, status: "applied", appliedAt: updatedAt, updatedAt };
+  transaction.objectStore("importBatches").put(appliedBatch);
+  const queueStore = transaction.objectStore("syncQueue");
+  const enqueue = (entityType, entity) => queueStore.put({ id: crypto.randomUUID(), entityType, entityId: entity.id, operation: "upsert", payload: entity, createdAt: entity.updatedAt || updatedAt, status: "pending" });
+  enqueue("importBatches", appliedBatch);
+  for (const change of changes) {
+    transaction.objectStore(change.store).put(change.entity);
+    enqueue(change.store, change.entity);
+  }
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve(appliedBatch);
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
 export async function remove(storeName, id) {
   const db = await openDatabase();
   return new Promise((resolve, reject) => {

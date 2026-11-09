@@ -9,6 +9,7 @@
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./responsive.css">
+  <link rel="stylesheet" href="./ocr.css">
   <title>TeachFlow 教學進度管家</title>
 </head>
 <body>
@@ -61,12 +62,12 @@
         <article class="tf-card">
           <h2 class="import-title">📸 課表／行事曆智慧辨識</h2>
           <p class="import-copy">直接上傳教務處發布的個人課表截圖或整學期行事曆，系統會先建立待核對批次，確認前不會修改正式資料。</p>
-          <div class="integration-box"><span>✨ 辨識服務狀態</span><strong>待設定伺服器端 OCR 憑證</strong><small>原始文件不會在此靜態部署中送往第三方服務</small></div>
+          <div class="integration-box"><span>✨ 辨識服務狀態</span><strong>Google Drive OCR 已啟用</strong><small>文字型 PDF 在本機解析；掃描頁經安全後端辨識，暫存文件完成後立即移到垃圾桶</small></div>
           <div class="upload-grid">
             <label class="upload-button schedule-upload"><span>📅</span><b>匯入課表圖檔</b><small>JPG／PNG／PDF</small><input class="hidden" data-import-kind="schedule" type="file" accept="image/jpeg,image/png,application/pdf" multiple></label>
             <label class="upload-button calendar-upload"><span>🏫</span><b>匯入學期行事曆</b><small>PDF／官方截圖</small><input class="hidden" data-import-kind="calendar" type="file" accept="image/jpeg,image/png,application/pdf" multiple></label>
           </div>
-          <div id="import-result"></div>
+          <div id="import-result" aria-live="polite"></div>
         </article>
       </section>
     </main>

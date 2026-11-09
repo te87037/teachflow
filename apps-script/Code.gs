@@ -2,6 +2,8 @@ const SHEET_NAME = "TeachFlow資料";
 const HEADER = ["操作ID", "資料類型", "資料ID", "動作", "修改時間", "JSON資料"];
 const MAX_OPERATIONS = 500;
 const MAX_PAYLOAD_CHARS = 900000;
+const MAX_OCR_BASE64_CHARS = 6000000;
+const OCR_MIME_TYPES = ["image/jpeg", "image/png"];
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile("Bridge")
@@ -13,6 +15,20 @@ function digest_(value) {
   return Utilities.base64EncodeWebSafe(
     Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(value || ""), Utilities.Charset.UTF_8)
   );
+}
+
+function digestBytes_(bytes) {
+  return Utilities.base64EncodeWebSafe(
+    Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, bytes)
+  );
+}
+
+function authorize_(request) {
+  const properties = PropertiesService.getScriptProperties();
+  const expectedSecret = properties.getProperty("TEACHFLOW_SYNC_SECRET");
+  if (!expectedSecret) throw new Error("BACKEND_NOT_CONFIGURED");
+  if (digest_(request && request.secret) !== digest_(expectedSecret)) throw new Error("INVALID_SYNC_SECRET");
+  return properties;
 }
 
 function validOperations_(operations) {
@@ -62,11 +78,9 @@ function ensureSheet_(spreadsheet) {
 }
 
 function syncTeachFlow(request) {
-  const properties = PropertiesService.getScriptProperties();
-  const expectedSecret = properties.getProperty("TEACHFLOW_SYNC_SECRET");
+  const properties = authorize_(request);
   const spreadsheetId = properties.getProperty("GOOGLE_SHEETS_SPREADSHEET_ID");
-  if (!expectedSecret || !spreadsheetId) throw new Error("BACKEND_NOT_CONFIGURED");
-  if (digest_(request && request.secret) !== digest_(expectedSecret)) throw new Error("INVALID_SYNC_SECRET");
+  if (!spreadsheetId) throw new Error("BACKEND_NOT_CONFIGURED");
 
   const operations = request && request.operations ? request.operations : [];
   if (!validOperations_(operations)) throw new Error("INVALID_OPERATIONS");
@@ -99,5 +113,46 @@ function syncTeachFlow(request) {
     return { operations: remoteOperations.concat(additions) };
   } finally {
     lock.releaseLock();
+  }
+}
+
+function recognizeTeachFlowPage(request) {
+  authorize_(request);
+  const page = request && request.page;
+  if (!page || typeof page !== "object") throw new Error("INVALID_OCR_PAGE");
+  if (OCR_MIME_TYPES.indexOf(page.mimeType) < 0) throw new Error("INVALID_OCR_MIME");
+  if (!Number.isInteger(page.pageNumber) || page.pageNumber < 1 || page.pageNumber > 100) throw new Error("INVALID_OCR_PAGE_NUMBER");
+  if (typeof page.base64 !== "string" || !page.base64.length || page.base64.length > MAX_OCR_BASE64_CHARS) throw new Error("OCR_PAGE_TOO_LARGE");
+
+  let bytes;
+  try {
+    bytes = Utilities.base64Decode(page.base64);
+  } catch (error) {
+    throw new Error("INVALID_OCR_BASE64");
+  }
+  const safeName = String(page.fileName || "TeachFlow-page").replace(/[\\/:*?"<>|]/g, "_").slice(0, 120);
+  const blob = Utilities.newBlob(bytes, page.mimeType, safeName);
+  let documentId;
+  try {
+    const documentFile = Drive.Files.create({
+      name: "TeachFlow OCR - " + Utilities.getUuid(),
+      mimeType: "application/vnd.google-apps.document"
+    }, blob, {
+      ocrLanguage: "zh-TW",
+      fields: "id"
+    });
+    documentId = documentFile.id;
+    const text = DocumentApp.openById(documentId).getBody().getText();
+    return {
+      pageNumber: page.pageNumber,
+      text: text || "",
+      provider: "google-drive-ocr",
+      digest: digestBytes_(bytes)
+    };
+  } finally {
+    if (documentId) {
+      try { DriveApp.getFileById(documentId).setTrashed(true); }
+      catch (cleanupError) { console.warn("OCR temporary document cleanup failed", documentId); }
+    }
   }
 }

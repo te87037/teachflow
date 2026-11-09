@@ -1,0 +1,88 @@
+.import-empty {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: center;
+}
+
+.import-batch { display: grid; gap: 4px; }
+.import-processing { background: #eff6ff; color: #1d4ed8; }
+.import-error { background: #fff1f2; color: #be123c; }
+
+.import-review-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.import-review-heading div { display: grid; gap: 2px; }
+.import-review-heading strong { font-size: 13px; }
+.import-review-heading span { font-size: 10px; color: #6366f1; }
+
+.review-item {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.review-source {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.review-source b { color: #4338ca; white-space: nowrap; }
+.review-source span { line-height: 1.45; max-height: 3.1em; overflow: auto; }
+.review-fields { display: grid; gap: 8px; margin-top: 10px; }
+.review-fields.three-columns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.calendar-fields { grid-template-columns: 1fr 1fr; }
+.calendar-fields .title-field { grid-column: 1 / -1; }
+
+.review-fields label {
+  display: grid;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.review-fields input,
+.review-fields select {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 7px;
+  color: #1e293b;
+  font-size: 12px;
+}
+
+.import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 390px) {
+  .review-fields.three-columns,
+  .calendar-fields { grid-template-columns: 1fr; }
+  .calendar-fields .title-field { grid-column: auto; }
+}
