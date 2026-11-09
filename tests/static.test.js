@@ -12,6 +12,9 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(app, /data-step="1"/);
   assert.match(app, /data-step="2"/);
   assert.match(app, /saveInlineRecord/);
+  assert.match(app, /classSaveQueues/);
+  assert.match(app, /optimisticPages/);
+  assert.match(app, /enqueueInlineRecordUpdate/);
 });
 
 test("介面會依手機、平板與桌機寬度切換欄數", async () => {

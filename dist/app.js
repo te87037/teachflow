@@ -12,6 +12,8 @@ const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => 
 let syncing = false;
 let toastTimer;
 let lastBrowserDate = browserDateKey();
+const classSaveQueues = new Map();
+const optimisticPages = new Map();
 
 async function load({ seed = true } = {}) {
   if (seed) await seedIfEmpty();
@@ -151,12 +153,14 @@ function renderToday() {
     const klass = byId(state.classes, lesson.classId);
     const subject = byId(state.subjects, lesson.subjectId);
     const period = byId(state.periods, lesson.periodId);
-    const record = progressFor(lesson.classId);
+    const sharedRecord = progressFor(lesson.classId);
+    const optimisticPage = optimisticPages.get(lesson.classId);
+    const record = optimisticPage === undefined ? sharedRecord : { ...(sharedRecord || {}), page: optimisticPage };
     const target = targetFor(lesson.classId);
     const remaining = target ? remainingLessons(state.lessons, { classId: lesson.classId, subjectId: lesson.subjectId, cutoffDate: target.cutoffDate, fromDate: dateKey() }) : [];
     const result = target ? pace({ targetPage: target.targetPage, completedPage: record?.page || 0, remainingCount: remaining.length }) : { perLesson: null };
     const next = isNextLesson(lesson, lessons);
-    return `<article class="tf-card lesson-card ${next ? "is-next" : ""}" data-lesson-id="${escapeHtml(lesson.id)}">
+    return `<article class="tf-card lesson-card ${next ? "is-next" : ""}" data-lesson-id="${escapeHtml(lesson.id)}" data-class-id="${escapeHtml(lesson.classId)}">
       ${lesson.source === "exception" || lesson.source === "added" ? '<span class="swap-tag">臨時調課</span>' : next ? '<span class="next-tag">當前／下一節</span>' : ""}
       <div class="lesson-heading"><div class="lesson-identity"><span class="period-pill">第 ${escapeHtml(period?.order || "—")} 節</span><span class="lesson-class">${escapeHtml(klass?.name)}</span><span class="lesson-subject">${escapeHtml(subject?.name)}</span></div><span class="pace-badge ${paceClass(result.perLesson)}">配速 ${result.perLesson === null ? "—" : result.perLesson.toFixed(1)} 頁／堂</span></div>
       <input class="chapter-input" data-field="chapter" value="${escapeHtml(record?.chapter || "")}" placeholder="點擊輸入當前進度單元／章節…">
@@ -166,11 +170,18 @@ function renderToday() {
   }).join("");
   container.querySelectorAll(".lesson-card").forEach((card) => {
     const lessonId = card.dataset.lessonId;
-    card.querySelectorAll("[data-field]").forEach((input) => input.addEventListener("change", () => saveInlineRecord(lessonId, { [input.dataset.field]: input.value })));
+    card.querySelectorAll("[data-field]").forEach((input) => input.addEventListener("change", () => { void enqueueInlineRecordUpdate(lessonId, { [input.dataset.field]: input.value }); }));
     card.querySelectorAll("[data-step]").forEach((button) => button.addEventListener("click", () => {
+      const lesson = state.lessons.find((item) => item.id === lessonId);
+      if (!lesson) return;
       const input = card.querySelector("[data-field='page']");
-      input.value = Math.max(0, Number(input.value || 0) + Number(button.dataset.step));
-      saveInlineRecord(lessonId, { page: input.value });
+      const currentPage = optimisticPages.get(lesson.classId) ?? Number(progressFor(lesson.classId)?.page || input.value || 0);
+      const nextPage = Math.max(0, currentPage + Number(button.dataset.step));
+      optimisticPages.set(lesson.classId, nextPage);
+      container.querySelectorAll(".lesson-card").forEach((item) => {
+        if (item.dataset.classId === lesson.classId) item.querySelector("[data-field='page']").value = nextPage;
+      });
+      void enqueueInlineRecordUpdate(lessonId, { page: nextPage });
     }));
   });
 }
@@ -282,6 +293,24 @@ async function saveInlineRecord(lessonId, patch) {
   renderAll();
   showToast(`${byId(state.classes, lesson.classId)?.name} 已自動存檔`, "📖");
   void syncGoogleSheet();
+}
+
+function enqueueInlineRecordUpdate(lessonId, patch) {
+  const lesson = state.lessons.find((item) => item.id === lessonId);
+  if (!lesson) return Promise.resolve();
+  const previous = classSaveQueues.get(lesson.classId) || Promise.resolve();
+  const task = previous.catch(() => {}).then(() => saveInlineRecord(lessonId, patch)).catch((error) => {
+    console.error(error);
+    showToast("進度儲存失敗，請再試一次", "⚠️");
+  });
+  classSaveQueues.set(lesson.classId, task);
+  void task.finally(() => {
+    if (classSaveQueues.get(lesson.classId) !== task) return;
+    classSaveQueues.delete(lesson.classId);
+    optimisticPages.delete(lesson.classId);
+    renderAll();
+  });
+  return task;
 }
 
 async function handleImport(event) {
