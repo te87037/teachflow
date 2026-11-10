@@ -16,7 +16,6 @@ let lastRemoteFingerprint = null;
 const AUTO_SYNC_INTERVAL_MS = 60 * 1000;
 const classSaveQueues = new Map();
 const optimisticPages = new Map();
-const lessonCountSaveTimers = new Map();
 
 async function load({ seed = true } = {}) {
   if (seed) await seedIfEmpty();
@@ -158,6 +157,7 @@ function renderToday() {
   $("#day-switcher-buttons").querySelectorAll(".day-button").forEach((button) => button.addEventListener("click", () => { state.selectedDate = dateForWeekday(Number(button.dataset.weekday)); renderAll(); }));
   const lessons = state.lessons.filter((lesson) => lesson.date === state.selectedDate && lesson.status === "scheduled");
   $("#header-date").textContent = formatHeaderDate(state.selectedDate);
+  $("#header-class-count").textContent = `當日 ${lessons.length} 堂課`;
   $("#today-list-title").textContent = `週${weekdays[selectedWeekday]}授課清單`;
   const container = $("#today-lessons");
   if (!lessons.length) {
@@ -221,10 +221,9 @@ function renderPace() {
     const progress = progressFor(target.classId);
     const remaining = remainingLessons(state.lessons, { classId: target.classId, subjectId: target.subjectId, cutoffDate: target.cutoffDate, fromDate: dateKey() });
     const lessonCount = lessonCountFor(target, remaining.length);
-    const isCustomLessonCount = target.remainingLessonCount !== undefined && target.remainingLessonCount !== null;
     const result = pace({ targetPage: target.targetPage, completedPage: progress?.page || 0, remainingCount: lessonCount });
     const percent = Math.min(100, Math.round(((progress?.page || 0) / target.targetPage) * 100));
-    return `<article class="tf-card pace-card"><div class="pace-card-heading"><div><span class="period-pill">${escapeHtml(klass?.name)}</span><p>${escapeHtml(progress?.chapter || "尚未輸入單元")}</p></div><span class="pace-badge ${paceClass(result.perLesson)}">每堂需 ${result.perLesson === null ? "—" : result.perLesson.toFixed(1)} 頁</span></div><div class="progress-row"><span>進度 P.${progress?.page || 0}（${percent}%）</span><span>尚差 ${result.remainingPages} 頁</span></div><div class="progress-track"><div class="progress-bar" style="width:${percent}%"></div></div><div class="pace-footer"><div class="lesson-count-control"><label><span>考前實質</span><input class="remaining-count-input" data-target-id="${escapeHtml(target.id)}" type="number" min="0" step="1" inputmode="numeric" value="${lessonCount}" aria-label="${escapeHtml(klass?.name)}考前實質堂數"><span>堂</span></label>${isCustomLessonCount ? `<button class="remaining-count-reset" data-reset-target-id="${escapeHtml(target.id)}" type="button" title="恢復依課表自動計算">↺ 自動</button>` : `<span class="automatic-count-hint" title="依課表自動計算">自動</span>`}</div><span class="pace-memo">備忘：${escapeHtml(progress?.memo || "無")}</span></div></article>`;
+    return `<article class="tf-card pace-card"><div class="pace-card-heading"><div><span class="period-pill">${escapeHtml(klass?.name)}</span><p>${escapeHtml(progress?.chapter || "尚未輸入單元")}</p></div><span class="pace-badge ${paceClass(result.perLesson)}">每堂需 ${result.perLesson === null ? "—" : result.perLesson.toFixed(1)} 頁</span></div><div class="progress-row"><span>進度 P.${progress?.page || 0}（${percent}%）</span><span>尚差 ${result.remainingPages} 頁</span></div><div class="progress-track"><div class="progress-bar" style="width:${percent}%"></div></div><div class="pace-footer"><div class="lesson-count-control"><span>考前實質尚有：</span><button class="remaining-count-step" data-target-id="${escapeHtml(target.id)}" data-count-step="-1" type="button" aria-label="${escapeHtml(klass?.name)}考前堂數減一">−</button><strong>${lessonCount} 堂</strong><button class="remaining-count-step" data-target-id="${escapeHtml(target.id)}" data-count-step="1" type="button" aria-label="${escapeHtml(klass?.name)}考前堂數加一">＋</button></div><span class="pace-memo">備忘：${escapeHtml(progress?.memo || "無")}</span></div></article>`;
   }).join("") || `<article class="tf-card empty-card"><span>📚</span><strong>此年級尚無班級進度</strong><p>請先到常規課表管理班級。</p></article>`;
 }
 
@@ -243,13 +242,12 @@ async function saveRemainingLessonCount(targetId, value) {
   void syncGoogleSheet();
 }
 
-function queueRemainingLessonCount(input, delay = 450) {
-  const targetId = input.dataset.targetId;
-  clearTimeout(lessonCountSaveTimers.get(targetId));
-  lessonCountSaveTimers.set(targetId, setTimeout(() => {
-    lessonCountSaveTimers.delete(targetId);
-    void saveRemainingLessonCount(targetId, input.value.trim() === "" ? null : input.value);
-  }, delay));
+function adjustRemainingLessonCount(targetId, delta) {
+  const target = byId(state.targets, targetId);
+  if (!target) return;
+  const automaticCount = remainingLessons(state.lessons, { classId: target.classId, subjectId: target.subjectId, cutoffDate: target.cutoffDate, fromDate: dateKey() }).length;
+  const currentCount = lessonCountFor(target, automaticCount);
+  void saveRemainingLessonCount(targetId, Math.max(0, currentCount + delta));
 }
 
 function renderSchedule() {
@@ -727,18 +725,9 @@ $("#classes-form").addEventListener("submit", saveClasses);
 $("#exam-config-button").addEventListener("click", openExamDialog);
 $("#exam-target-config-button").addEventListener("click", openExamDialog);
 $("#exam-form").addEventListener("submit", saveExam);
-$("#pace-list").addEventListener("input", (event) => {
-  const input = event.target.closest(".remaining-count-input");
-  if (input) queueRemainingLessonCount(input);
-});
-$("#pace-list").addEventListener("change", (event) => {
-  const input = event.target.closest(".remaining-count-input");
-  if (!input) return;
-  queueRemainingLessonCount(input, 0);
-});
 $("#pace-list").addEventListener("click", (event) => {
-  const button = event.target.closest("[data-reset-target-id]");
-  if (button) void saveRemainingLessonCount(button.dataset.resetTargetId, null);
+  const button = event.target.closest("[data-count-step]");
+  if (button) adjustRemainingLessonCount(button.dataset.targetId, Number(button.dataset.countStep));
 });
 $("#connection-state").addEventListener("click", async () => {
   $("#spreadsheet-id").value = await selectedSpreadsheetId();
