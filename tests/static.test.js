@@ -10,8 +10,8 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(html, />AI 匯入<\/button>/);
   assert.match(html, /id="manage-classes"/);
   assert.match(html, /id="classes-dialog"/);
-  assert.match(html, /classes\.css\?v=20/);
-  assert.match(html, /app\.js\?v=20/);
+  assert.match(html, /classes\.css\?v=21/);
+  assert.match(html, /app\.js\?v=21/);
   assert.match(html, /id="exam-target-config-button"/);
   assert.match(html, /id="pace-grade-buttons"/);
   const app = await readFile(new URL("../dist/app.js", import.meta.url), "utf8");
@@ -27,6 +27,12 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(app, /grade-filter-button/);
   assert.match(app, /exam-target-config-button/);
   assert.match(app, /套用至此年級的所有班級/);
+  assert.match(app, /remainingLessonCount/);
+  assert.match(app, /remaining-count-input/);
+  assert.match(app, /remaining-count-reset/);
+  assert.match(app, /lessonCountSaveTimers/);
+  assert.match(app, /addEventListener\("input"/);
+  assert.match(app, /queueEntity\("examTargets", updated\)/);
   assert.match(app, /AUTO_SYNC_INTERVAL_MS\s*=\s*60\s*\*\s*1000/);
   assert.match(app, /setInterval\(\(\)\s*=>\s*\{\s*void syncGoogleSheet\(\)/);
   assert.match(app, /remoteFingerprint/);
