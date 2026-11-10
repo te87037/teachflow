@@ -12,6 +12,8 @@ const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => 
 let syncing = false;
 let toastTimer;
 let lastBrowserDate = browserDateKey();
+let lastRemoteFingerprint = null;
+const AUTO_SYNC_INTERVAL_MS = 60 * 1000;
 const classSaveQueues = new Map();
 const optimisticPages = new Map();
 
@@ -61,6 +63,9 @@ async function syncGoogleSheet() {
   try {
     await put("settings", { id: "google-spreadsheet-id", value: spreadsheetId });
     const remoteOperations = await pullOperations(spreadsheetId);
+    const lastRemoteOperation = remoteOperations.at(-1);
+    const remoteFingerprint = `${remoteOperations.length}:${lastRemoteOperation?.operationId || ""}:${lastRemoteOperation?.updatedAt || ""}`;
+    const remoteChanged = remoteFingerprint !== lastRemoteFingerprint;
     const queued = await all("syncQueue");
     const pendingOperations = queued.map(queueToOperation);
     if (!remoteOperations.length) {
@@ -75,8 +80,11 @@ async function syncGoogleSheet() {
     }
     await appendOperations(spreadsheetId, pendingOperations);
     for (const item of queued) await remove("syncQueue", item.id);
-    await applyRemoteOperations([...remoteOperations, ...pendingOperations]);
-    await load({ seed: false });
+    if (remoteChanged || pendingOperations.length) {
+      await applyRemoteOperations([...remoteOperations, ...pendingOperations]);
+      await load({ seed: false });
+    }
+    lastRemoteFingerprint = remoteFingerprint;
     setConnectionStatus("雲端已同步");
   } catch (error) {
     console.error(error);
@@ -714,6 +722,7 @@ document.addEventListener("visibilitychange", () => {
   void syncGoogleSheet();
 });
 setInterval(refreshCurrentLessonIndicator, 30000);
+setInterval(() => { void syncGoogleSheet(); }, AUTO_SYNC_INTERVAL_MS);
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js");
 load().then(async () => {

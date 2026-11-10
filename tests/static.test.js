@@ -23,6 +23,9 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(app, /queueEntity\("classes"/);
   assert.match(app, /selectedPaceGrade/);
   assert.match(app, /grade-filter-button/);
+  assert.match(app, /AUTO_SYNC_INTERVAL_MS\s*=\s*60\s*\*\s*1000/);
+  assert.match(app, /setInterval\(\(\)\s*=>\s*\{\s*void syncGoogleSheet\(\)/);
+  assert.match(app, /remoteFingerprint/);
 });
 
 test("介面會依手機、平板與桌機寬度切換欄數", async () => {
