@@ -638,11 +638,14 @@ async function saveSchedule(event) {
   void syncGoogleSheet();
 }
 
-function openExamDialog() {
+function openExamDialog(event) {
   const target = state.targets.find((item) => byId(state.classes, item.classId)?.grade === state.selectedPaceGrade);
   $("#exam-target").value = target?.targetPage || 1;
   $("#exam-date").value = target?.cutoffDate || dateKey();
+  $("#exam-dialog-grade").textContent = `${state.selectedPaceGrade || "目前年級"} · 套用至此年級的所有班級`;
   $("#exam-dialog").showModal();
+  const focusTarget = event?.currentTarget?.id === "exam-target-config-button" ? $("#exam-target") : $("#exam-date");
+  requestAnimationFrame(() => focusTarget.focus());
 }
 
 async function saveExam(event) {
@@ -689,6 +692,7 @@ $("#class-list").addEventListener("click", (event) => {
 });
 $("#classes-form").addEventListener("submit", saveClasses);
 $("#exam-config-button").addEventListener("click", openExamDialog);
+$("#exam-target-config-button").addEventListener("click", openExamDialog);
 $("#exam-form").addEventListener("submit", saveExam);
 $("#connection-state").addEventListener("click", async () => {
   $("#spreadsheet-id").value = await selectedSpreadsheetId();

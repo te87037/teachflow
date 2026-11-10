@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./responsive.css?v=11">
   <link rel="stylesheet" href="./ocr.css?v=11">
-  <link rel="stylesheet" href="./classes.css?v=19">
+  <link rel="stylesheet" href="./classes.css?v=20">
   <title>TeachFlow 教學進度管家</title>
 </head>
 <body>
@@ -47,7 +47,7 @@
         <div class="pace-grade-switcher"><span>年級進度</span><div id="pace-grade-buttons"></div></div>
         <div class="exam-banner">
           <div class="row-between"><span id="exam-title">段考目標</span><button id="exam-config-button" type="button">考試日：<span id="exam-date-label">—</span> ✏️</button></div>
-          <div class="exam-summary"><strong>倒數 <span id="exam-days-label">—</span> 天</strong><span>目標範圍：<b>P.<span id="exam-target-label">—</span></b></span></div>
+          <div class="exam-summary"><strong>倒數 <span id="exam-days-label">—</span> 天</strong><button id="exam-target-config-button" class="exam-target-button" type="button" aria-label="修改段考目標範圍">目標範圍：<b>P.<span id="exam-target-label">—</span></b><span class="exam-edit-icon" aria-hidden="true">✏️</span></button></div>
           <div class="exam-note"><span>扣除停課、活動與單次異動</span><span>已動態核算各班實質堂數</span></div>
         </div>
         <div id="pace-list"></div>
@@ -104,7 +104,7 @@
 
   <dialog id="exam-dialog">
     <form id="exam-form" method="dialog">
-      <div class="dialog-heading"><div><h2>🎯 修改段考目標設定</h2></div><button class="icon-button dialog-close" type="button">×</button></div>
+      <div class="dialog-heading"><div><h2>🎯 修改段考目標設定</h2><p id="exam-dialog-grade">套用至目前年級的所有班級</p></div><button class="icon-button dialog-close" type="button">×</button></div>
       <label>段考目標頁碼（P.）<input id="exam-target" type="number" min="1" required></label>
       <label>段考日期<input id="exam-date" type="date" required></label>
       <div class="dialog-actions"><button class="cancel-button dialog-close" type="button">取消</button><button class="primary-button" type="submit">儲存設定</button></div>
@@ -123,6 +123,6 @@
   </dialog>
 
   <script src="./remote-config.js"></script>
-  <script type="module" src="./app.js?v=18"></script>
+  <script type="module" src="./app.js?v=20"></script>
 </body>
 </html>

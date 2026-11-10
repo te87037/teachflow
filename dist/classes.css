@@ -123,6 +123,30 @@
   letter-spacing: -.04em;
 }
 
+.exam-summary .exam-target-button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  min-height: 36px;
+  padding: 6px 9px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.exam-summary .exam-target-button b {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.exam-summary .exam-target-button .exam-edit-icon {
+  margin-left: 2px;
+  color: #fff;
+  font-size: 11px;
+}
+
 @media (max-width: 430px) {
   .class-management-heading { align-items: center; }
   .class-row { grid-template-columns: 1fr auto; }
