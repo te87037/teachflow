@@ -4,7 +4,7 @@ import { prepareImportPages } from "./ocr.js";
 import { parseImportCandidates } from "./ocr-parser.js";
 import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations, recognizeOcrPage } from "./remote.js";
 
-const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], importBatches: [], lessons: [], selectedDate: browserDateKey() };
+const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], importBatches: [], lessons: [], selectedDate: browserDateKey(), selectedPaceGrade: null };
 const weekdays = ["", "一", "二", "三", "四", "五", "六", "日"];
 const $ = (selector) => document.querySelector(selector);
 const byId = (items, id) => items.find((item) => item.id === id);
@@ -187,20 +187,28 @@ function renderToday() {
 }
 
 function renderPace() {
-  const firstTarget = state.targets[0];
+  const grades = [...new Set(state.classes.map((item) => item.grade).filter(Boolean))];
+  if (!grades.includes(state.selectedPaceGrade)) state.selectedPaceGrade = grades[0] || null;
+  $("#pace-grade-buttons").innerHTML = grades.map((grade) => `<button class="grade-filter-button ${grade === state.selectedPaceGrade ? "active" : ""}" data-grade="${escapeHtml(grade)}" type="button">${escapeHtml(grade)}</button>`).join("");
+  $("#pace-grade-buttons").querySelectorAll("[data-grade]").forEach((button) => button.addEventListener("click", () => {
+    state.selectedPaceGrade = button.dataset.grade;
+    renderPace();
+  }));
+  const targets = state.targets.filter((target) => byId(state.classes, target.classId)?.grade === state.selectedPaceGrade);
+  const firstTarget = targets[0];
   $("#exam-title").textContent = firstTarget?.title || "段考目標";
   $("#exam-date-label").textContent = firstTarget?.cutoffDate || "—";
   $("#exam-target-label").textContent = firstTarget?.targetPage || "—";
   const days = firstTarget ? Math.max(0, Math.ceil((new Date(`${firstTarget.cutoffDate}T12:00:00+08:00`) - new Date(`${dateKey()}T12:00:00+08:00`)) / 86400000)) : 0;
   $("#exam-days-label").textContent = days;
-  $("#pace-list").innerHTML = state.targets.map((target) => {
+  $("#pace-list").innerHTML = targets.map((target) => {
     const klass = byId(state.classes, target.classId);
     const progress = progressFor(target.classId);
     const remaining = remainingLessons(state.lessons, { classId: target.classId, subjectId: target.subjectId, cutoffDate: target.cutoffDate, fromDate: dateKey() });
     const result = pace({ targetPage: target.targetPage, completedPage: progress?.page || 0, remainingCount: remaining.length });
     const percent = Math.min(100, Math.round(((progress?.page || 0) / target.targetPage) * 100));
     return `<article class="tf-card"><div class="pace-card-heading"><div><span class="period-pill">${escapeHtml(klass?.name)}</span><p>${escapeHtml(progress?.chapter || "尚未輸入單元")}</p></div><span class="pace-badge ${paceClass(result.perLesson)}">每堂需 ${result.perLesson === null ? "—" : result.perLesson.toFixed(1)} 頁</span></div><div class="progress-row"><span>進度 P.${progress?.page || 0}（${percent}%）</span><span>尚差 ${result.remainingPages} 頁</span></div><div class="progress-track"><div class="progress-bar" style="width:${percent}%"></div></div><div class="pace-footer"><span>考前實質尚有：<strong>${remaining.length} 堂</strong></span><span>備忘：${escapeHtml(progress?.memo || "無")}</span></div></article>`;
-  }).join("");
+  }).join("") || `<article class="tf-card empty-card"><span>📚</span><strong>此年級尚無班級進度</strong><p>請先到常規課表管理班級。</p></article>`;
 }
 
 function renderSchedule() {
@@ -623,7 +631,7 @@ async function saveSchedule(event) {
 }
 
 function openExamDialog() {
-  const target = state.targets[0];
+  const target = state.targets.find((item) => byId(state.classes, item.classId)?.grade === state.selectedPaceGrade);
   $("#exam-target").value = target?.targetPage || 1;
   $("#exam-date").value = target?.cutoffDate || dateKey();
   $("#exam-dialog").showModal();
@@ -631,14 +639,19 @@ function openExamDialog() {
 
 async function saveExam(event) {
   event.preventDefault();
-  const target = state.targets[0];
-  if (!target) return;
-  const updated = { ...target, targetPage: Math.max(1, Number($("#exam-target").value) || 1), cutoffDate: $("#exam-date").value, updatedAt: new Date().toISOString() };
-  await put("examTargets", updated);
-  await queueEntity("examTargets", updated);
+  const targets = state.targets.filter((item) => byId(state.classes, item.classId)?.grade === state.selectedPaceGrade);
+  if (!targets.length) return;
+  const targetPage = Math.max(1, Number($("#exam-target").value) || 1);
+  const cutoffDate = $("#exam-date").value;
+  const updatedAt = new Date().toISOString();
+  for (const target of targets) {
+    const updated = { ...target, targetPage, cutoffDate, updatedAt };
+    await put("examTargets", updated);
+    await queueEntity("examTargets", updated);
+  }
   $("#exam-dialog").close();
   await load({ seed: false });
-  showToast("段考目標已更新", "🎯");
+  showToast(`${state.selectedPaceGrade || "目前年級"}段考目標已更新`, "🎯");
   void syncGoogleSheet();
 }
 

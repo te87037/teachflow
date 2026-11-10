@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./responsive.css?v=11">
   <link rel="stylesheet" href="./ocr.css?v=11">
-  <link rel="stylesheet" href="./classes.css?v=15">
+  <link rel="stylesheet" href="./classes.css?v=16">
   <title>TeachFlow 教學進度管家</title>
 </head>
 <body>
@@ -44,6 +44,7 @@
       </section>
 
       <section id="view-pace" class="view hidden">
+        <div class="pace-grade-switcher"><span>年級進度</span><div id="pace-grade-buttons"></div></div>
         <div class="exam-banner">
           <div class="row-between"><span id="exam-title">段考目標</span><button id="exam-config-button" type="button">考試日：<span id="exam-date-label">—</span> ✏️</button></div>
           <div class="exam-summary"><strong>倒數 <span id="exam-days-label">—</span> 天</strong><span>目標範圍：<b>P.<span id="exam-target-label">—</span></b></span></div>
@@ -122,6 +123,6 @@
   </dialog>
 
   <script src="./remote-config.js"></script>
-  <script type="module" src="./app.js?v=15"></script>
+  <script type="module" src="./app.js?v=16"></script>
 </body>
 </html>

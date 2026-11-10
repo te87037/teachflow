@@ -10,7 +10,8 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(html, />AI 匯入<\/button>/);
   assert.match(html, /id="manage-classes"/);
   assert.match(html, /id="classes-dialog"/);
-  assert.match(html, /classes\.css\?v=15/);
+  assert.match(html, /classes\.css\?v=16/);
+  assert.match(html, /id="pace-grade-buttons"/);
   const app = await readFile(new URL("../dist/app.js", import.meta.url), "utf8");
   assert.match(app, /data-step="1"/);
   assert.match(app, /data-step="2"/);
@@ -20,6 +21,8 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(app, /enqueueInlineRecordUpdate/);
   assert.match(app, /saveClasses/);
   assert.match(app, /queueEntity\("classes"/);
+  assert.match(app, /selectedPaceGrade/);
+  assert.match(app, /grade-filter-button/);
 });
 
 test("介面會依手機、平板與桌機寬度切換欄數", async () => {
