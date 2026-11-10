@@ -1,0 +1,64 @@
+.class-management-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.class-management-heading > div { min-width: 0; }
+
+.secondary-button {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid #c7d2fe;
+  border-radius: 9px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.wide-dialog { width: min(calc(100% - 2rem), 30rem); }
+.class-list { display: grid; gap: 8px; margin-top: 12px; }
+
+.class-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.class-row label { margin: 0; }
+
+.remove-class-button {
+  width: 38px;
+  min-height: 38px;
+  border-radius: 9px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.add-class-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px dashed #a5b4fc;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 430px) {
+  .class-management-heading { align-items: center; }
+  .class-row { grid-template-columns: 1fr auto; }
+  .class-row label { grid-column: 1; }
+  .remove-class-button { grid-column: 2; grid-row: 1 / span 2; align-self: stretch; }
+}

@@ -493,6 +493,112 @@ function openScheduleDialog(weekday, periodId) {
   $("#schedule-dialog").showModal();
 }
 
+function classRowTemplate(klass = {}) {
+  return `<div class="class-row" data-class-id="${escapeHtml(klass.id || crypto.randomUUID())}">
+    <label>班級名稱<input data-class-field="name" required maxlength="30" value="${escapeHtml(klass.name || "")}" placeholder="例如：801 班"></label>
+    <label>年級<input data-class-field="grade" required maxlength="30" value="${escapeHtml(klass.grade || "")}" placeholder="例如：八年級"></label>
+    <button class="remove-class-button" data-remove-class type="button" aria-label="移除班級">×</button>
+  </div>`;
+}
+
+function openClassesDialog() {
+  $("#class-list").innerHTML = state.classes.map(classRowTemplate).join("");
+  $("#classes-dialog").showModal();
+}
+
+function classUsage(classId) {
+  const scheduled = state.scheduleVersions.some((version) => version.assignments.some((item) => item.classId === classId));
+  const recorded = state.records.some((record) => record.classId === classId);
+  const exceptional = state.exceptions.some((item) => !item.revokedAt && item.assignment?.classId === classId);
+  return { scheduled, recorded, exceptional, inUse: scheduled || recorded || exceptional };
+}
+
+async function saveClasses(event) {
+  event.preventDefault();
+  const rows = [...$("#class-list").querySelectorAll(".class-row")];
+  if (!rows.length) return showToast("請至少保留一個班級", "⚠️");
+  const now = new Date().toISOString();
+  const classes = rows.map((row) => ({
+    id: row.dataset.classId,
+    name: row.querySelector("[data-class-field='name']").value.trim(),
+    grade: row.querySelector("[data-class-field='grade']").value.trim()
+  }));
+  if (classes.some((item) => !item.name || !item.grade)) return showToast("請填寫所有班級名稱與年級", "⚠️");
+  const normalizedNames = classes.map((item) => item.name.replace(/\s/g, "").toLocaleLowerCase());
+  if (new Set(normalizedNames).size !== normalizedNames.length) return showToast("班級名稱不可重複", "⚠️");
+
+  const retainedIds = new Set(classes.map((item) => item.id));
+  const removedClasses = state.classes.filter((item) => !retainedIds.has(item.id));
+  const blocked = removedClasses.find((item) => classUsage(item.id).inUse);
+  if (blocked) return showToast(`${blocked.name} 仍被課表或進度使用，無法移除`, "⚠️");
+
+  const existingIds = new Set(state.classes.map((item) => item.id));
+  const savedClasses = classes.map((item) => {
+    const existing = byId(state.classes, item.id);
+    return existing && existing.name === item.name && existing.grade === item.grade ? existing : { ...existing, ...item, updatedAt: now };
+  });
+  for (const item of savedClasses) {
+    const existing = byId(state.classes, item.id);
+    if (existing === item) continue;
+    await put("classes", item);
+    await queueEntity("classes", item);
+  }
+
+  const classMap = new Map(savedClasses.map((item) => [item.id, item]));
+  for (const version of state.scheduleVersions) {
+    let changed = false;
+    const assignments = version.assignments.map((assignment) => {
+      const grade = classMap.get(assignment.classId)?.grade;
+      if (!grade || grade === assignment.grade) return assignment;
+      changed = true;
+      return { ...assignment, grade };
+    });
+    if (!changed) continue;
+    const updated = { ...version, assignments, updatedAt: now };
+    await put("scheduleVersions", updated);
+    await queueEntity("scheduleVersions", updated);
+  }
+
+  for (const exception of state.exceptions) {
+    const grade = classMap.get(exception.assignment?.classId)?.grade;
+    if (!grade || grade === exception.assignment.grade) continue;
+    const updated = { ...exception, assignment: { ...exception.assignment, grade }, updatedAt: now };
+    await put("exceptions", updated);
+    await queueEntity("exceptions", updated);
+  }
+
+  const baseTarget = state.targets[0];
+  for (const item of savedClasses.filter((klass) => !existingIds.has(klass.id))) {
+    const target = {
+      id: `target-${item.id}`,
+      classId: item.id,
+      subjectId: baseTarget?.subjectId || state.subjects[0]?.id,
+      materialId: baseTarget?.materialId || state.materials[0]?.id,
+      title: baseTarget?.title || "段考目標",
+      cutoffDate: baseTarget?.cutoffDate || addDays(browserDateKey(), 30),
+      targetPage: baseTarget?.targetPage || 1,
+      updatedAt: now
+    };
+    await put("examTargets", target);
+    await queueEntity("examTargets", target);
+  }
+
+  for (const item of removedClasses) {
+    const target = state.targets.find((candidate) => candidate.classId === item.id);
+    if (target) {
+      await queueEntity("examTargets", { ...target, updatedAt: now }, "delete");
+      await remove("examTargets", target.id);
+    }
+    await queueEntity("classes", { ...item, updatedAt: now }, "delete");
+    await remove("classes", item.id);
+  }
+
+  $("#classes-dialog").close();
+  await load({ seed: false });
+  showToast("班級設定已更新", "🏫");
+  void syncGoogleSheet();
+}
+
 async function saveSchedule(event) {
   event.preventDefault();
   const version = state.scheduleVersions[0];
@@ -553,6 +659,14 @@ $("#export-button").addEventListener("click", exportCsv);
 $("#swap-button").addEventListener("click", openSwapDialog);
 $("#swap-form").addEventListener("submit", saveSwap);
 $("#schedule-form").addEventListener("submit", saveSchedule);
+$("#manage-classes").addEventListener("click", openClassesDialog);
+$("#add-class-row").addEventListener("click", () => $("#class-list").insertAdjacentHTML("beforeend", classRowTemplate()));
+$("#class-list").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-remove-class]");
+  if (!button) return;
+  button.closest(".class-row").remove();
+});
+$("#classes-form").addEventListener("submit", saveClasses);
 $("#exam-config-button").addEventListener("click", openExamDialog);
 $("#exam-form").addEventListener("submit", saveExam);
 $("#connection-state").addEventListener("click", async () => {
