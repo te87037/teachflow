@@ -99,6 +99,20 @@
 
 .grade-filter-button.active { background: #4f46e5; color: #fff; }
 
+.exam-banner #exam-config-button {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.exam-banner #exam-date-label {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
 @media (max-width: 430px) {
   .class-management-heading { align-items: center; }
   .class-row { grid-template-columns: 1fr auto; }

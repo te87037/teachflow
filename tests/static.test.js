@@ -10,7 +10,7 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(html, />AI 匯入<\/button>/);
   assert.match(html, /id="manage-classes"/);
   assert.match(html, /id="classes-dialog"/);
-  assert.match(html, /classes\.css\?v=16/);
+  assert.match(html, /classes\.css\?v=17/);
   assert.match(html, /id="pace-grade-buttons"/);
   const app = await readFile(new URL("../dist/app.js", import.meta.url), "utf8");
   assert.match(app, /data-step="1"/);
@@ -64,6 +64,8 @@ test("Google Sheet 遠端儲存透過 Apps Script 安全橋接且不把 Google �
   assert.match(serviceWorker, /self\.clients\.claim\(\)/);
   assert.match(serviceWorker, /classes\.css/);
   assert.match(classesCss, /max-width:\s*430px/);
+  assert.match(classesCss, /#exam-date-label/);
+  assert.match(classesCss, /font-size:\s*15px/);
   assert.doesNotMatch(`${html}\n${remote}\n${pagesWorkflow}`, /client_secret|private_key|BEGIN PRIVATE KEY/i);
 });
 
