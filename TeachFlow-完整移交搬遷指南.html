@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>TeachFlow 完整移交與資料搬遷指南</title>
+  <style>
+    :root{--ink:#172033;--muted:#61708a;--line:#dfe5ef;--paper:#fff;--wash:#f4f7fb;--indigo:#4338ca;--indigo2:#312e81;--green:#047857;--amber:#a16207;--red:#be123c;--shadow:0 18px 45px rgba(31,41,55,.10)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--wash);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;line-height:1.65}
+    a{color:var(--indigo);font-weight:700}button{font:inherit}.shell{width:min(100% - 28px,980px);margin:22px auto 60px}.hero{padding:30px;border-radius:24px;background:linear-gradient(135deg,var(--indigo),var(--indigo2));color:#fff;box-shadow:var(--shadow)}
+    .eyebrow{margin:0 0 8px;font:800 12px ui-monospace,monospace;letter-spacing:.16em;color:#c7d2fe}.hero h1{margin:0;font-size:clamp(26px,5vw,44px);line-height:1.15}.hero p{max-width:760px;margin:14px 0 0;color:#e0e7ff}.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.pill{padding:5px 10px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.1);font-size:12px;font-weight:800}
+    .layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;margin-top:18px}.toc{position:sticky;top:16px;align-self:start;padding:16px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(31,41,55,.06)}.toc strong{display:block;margin-bottom:8px}.toc a{display:block;padding:6px 8px;border-radius:8px;color:#536079;font-size:13px;text-decoration:none}.toc a:hover{background:#eef2ff;color:var(--indigo)}
+    main{min-width:0}.card{margin-bottom:16px;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:0 8px 24px rgba(31,41,55,.05)}h2{margin:0 0 14px;font-size:21px}h3{margin:22px 0 9px;font-size:16px}p{margin:8px 0}ul,ol{padding-left:22px}.lead{font-size:16px}.notice{padding:14px 16px;border-left:4px solid var(--amber);border-radius:10px;background:#fffbeb;color:#713f12}.danger{border-left-color:var(--red);background:#fff1f2;color:#881337}.success{border-left-color:var(--green);background:#ecfdf5;color:#065f46}
+    .inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.datum{min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#f8fafc}.datum small{display:block;color:var(--muted);font-weight:800}.datum code{display:block;margin-top:3px;overflow-wrap:anywhere;color:#334155}.copy-row{display:flex;align-items:flex-start;gap:8px}.copy-row code{flex:1}.copy{flex:0 0 auto;padding:5px 9px;border:0;border-radius:7px;background:#e0e7ff;color:#3730a3;font-size:11px;font-weight:800;cursor:pointer}
+    .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}.flow div{position:relative;padding:12px 8px;border:1px solid #c7d2fe;border-radius:12px;background:#eef2ff;text-align:center;color:#3730a3;font-size:12px;font-weight:800}.flow div:not(:last-child)::after{content:"→";position:absolute;right:-9px;top:50%;z-index:2;transform:translateY(-50%);color:#818cf8}
+    .checklist{display:grid;gap:8px;padding:0;list-style:none}.checklist li{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.checklist input{width:18px;height:18px;margin-top:3px;accent-color:var(--indigo)}.checklist label{flex:1;cursor:pointer}.checklist input:checked+label{color:#94a3b8;text-decoration:line-through}
+    code,kbd{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{font-size:.92em}pre{overflow:auto;padding:14px;border-radius:12px;background:#111827;color:#e5e7eb;white-space:pre-wrap;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f8fafc}.status{font-weight:900;color:var(--green)}.muted{color:var(--muted)}.footer{text-align:center;color:var(--muted);font-size:12px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.primary,.secondary{padding:9px 14px;border-radius:10px;font-weight:800;cursor:pointer}.primary{border:0;background:var(--indigo);color:#fff}.secondary{border:1px solid #c7d2fe;background:#fff;color:var(--indigo)}
+    @media(max-width:760px){.shell{width:min(100% - 18px,980px);margin-top:9px}.hero{padding:22px;border-radius:18px}.layout{grid-template-columns:1fr}.toc{position:static}.toc nav{display:grid;grid-template-columns:repeat(2,1fr)}.inventory{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow div:not(:last-child)::after{content:"↓";right:auto;top:auto;bottom:-16px;left:50%;transform:translateX(-50%)}.card{padding:18px}table{display:block;overflow-x:auto}}
+    @media print{body{background:#fff}.shell{width:100%;margin:0}.hero{box-shadow:none}.layout{display:block}.toc,.actions,.copy{display:none}.card{break-inside:avoid;box-shadow:none}.checklist input{appearance:none;border:1px solid #64748b}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <p class="eyebrow">TEACHFLOW HANDOVER RUNBOOK</p>
+      <h1>完整移交與資料搬遷指南</h1>
+      <p>給新維護者的一份單檔移交手冊。依序完成 GitHub、Google Sheet、Apps Script、安全設定與驗收，即可把程式、遠端資料及部署權限完整移交。</p>
+      <div class="hero-meta"><span class="pill">單一教師版</span><span class="pill">Asia/Taipei</span><span class="pill">GitHub Pages</span><span class="pill">Google Sheets</span><span class="pill">Apps Script</span></div>
+    </header>
+
+    <div class="layout">
+      <aside class="toc"><strong>移交目錄</strong><nav>
+        <a href="#scope">0. 範圍與原則</a><a href="#inventory">1. 系統清冊</a><a href="#before">2. 移交前準備</a><a href="#github">3. GitHub</a><a href="#sheet">4. Google Sheet</a><a href="#script">5. Apps Script</a><a href="#deploy">6. 重新部署</a><a href="#device">7. 新裝置接手</a><a href="#verify">8. 驗收</a><a href="#rollback">9. 回復方案</a><a href="#security">10. 安全收尾</a>
+      </nav></aside>
+
+      <main>
+        <section id="scope" class="card">
+          <h2>0. 移交範圍與原則</h2>
+          <p class="lead">本次移交包含程式原始碼、GitHub Pages、自動部署、Google Sheet 完整操作紀錄、Apps Script 同步／OCR 後端與新裝置連線設定。</p>
+          <div class="notice danger"><strong>不要把密碼、私鑰或同步存取碼寫進此 HTML、GitHub 或聊天紀錄。</strong>本指南只列公開識別資訊與重新建立方式。同步密碼請另外用安全管道交付，並在移交後輪替。</div>
+          <div class="flow"><div>來源裝置完成同步</div><div>複製完整 Sheet</div><div>重建 Apps Script</div><div>更新 GitHub 設定</div><div>新網址驗收</div></div>
+          <p><strong>資料真實來源：</strong>瀏覽器 IndexedDB 是離線工作集；Google Sheet 的「TeachFlow資料」工作表保存跨裝置操作紀錄。移交完整資料時，必須先讓來源裝置顯示「雲端已同步」，再複製 Sheet。</p>
+        </section>
+
+        <section id="inventory" class="card">
+          <h2>1. 目前系統清冊</h2>
+          <div class="inventory">
+            <div class="datum"><small>GitHub 儲存庫</small><div class="copy-row"><code>https://github.com/te87037/teachflow</code><button class="copy" data-copy="https://github.com/te87037/teachflow">複製</button></div></div>
+            <div class="datum"><small>目前公開網站</small><div class="copy-row"><code>https://te87037.github.io/teachflow/</code><button class="copy" data-copy="https://te87037.github.io/teachflow/">複製</button></div></div>
+            <div class="datum"><small>目前 Google Sheet ID</small><div class="copy-row"><code>1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ</code><button class="copy" data-copy="1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ">複製</button></div></div>
+            <div class="datum"><small>資料工作表名稱</small><div class="copy-row"><code>TeachFlow資料</code><button class="copy" data-copy="TeachFlow資料">複製</button></div></div>
+            <div class="datum"><small>目前 Apps Script Web App</small><div class="copy-row"><code>https://script.google.com/macros/s/AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/exec</code><button class="copy" data-copy="https://script.google.com/macros/s/AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/exec">複製</button></div></div>
+            <div class="datum"><small>目前允許的前端來源</small><div class="copy-row"><code>https://te87037.github.io</code><button class="copy" data-copy="https://te87037.github.io">複製</button></div></div>
+            <div class="datum"><small>移交基準版本</small><code>619cdc4 · style: restore prototype lesson counts</code></div>
+            <div class="datum"><small>主要技術</small><code>HTML / CSS / ES Modules / IndexedDB / Service Worker / Apps Script / Google Sheets</code></div>
+          </div>
+          <h3>檔案責任分工</h3>
+          <table><thead><tr><th>位置</th><th>用途</th><th>移交是否必要</th></tr></thead><tbody>
+            <tr><td><code>dist/</code></td><td>可部署的 PWA 前端</td><td class="status">必要</td></tr>
+            <tr><td><code>apps-script/</code></td><td>Google 同步與 OCR 後端</td><td class="status">必要</td></tr>
+            <tr><td><code>.github/workflows/pages.yml</code></td><td>GitHub Pages 自動部署</td><td class="status">必要</td></tr>
+            <tr><td><code>tests/</code></td><td>運算與靜態安全測試</td><td class="status">必要</td></tr>
+            <tr><td><code>spec.md / design.md / tasks.md / acceptance.md</code></td><td>SDD 規格與驗收追蹤</td><td class="status">必要</td></tr>
+            <tr><td><code>README.md</code></td><td>開發、部署與維護入口</td><td class="status">必要</td></tr>
+          </tbody></table>
+        </section>
+
+        <section id="before" class="card">
+          <h2>2. 移交前準備</h2>
+          <ul class="checklist" data-list="before">
+            <li><input id="b1" type="checkbox"><label for="b1">來源手機／電腦打開 TeachFlow，確認頂端狀態顯示「雲端已同步」。</label></li>
+            <li><input id="b2" type="checkbox"><label for="b2">逐一查看班級、課表、段考目標與進度，確認最新修改已出現在另一台裝置。</label></li>
+            <li><input id="b3" type="checkbox"><label for="b3">確認 GitHub Actions 最近一次部署成功，且正式網址可開啟。</label></li>
+            <li><input id="b4" type="checkbox"><label for="b4">朋友已準備 GitHub 帳號與 Google 帳號，並能接收儲存庫移轉邀請。</label></li>
+            <li><input id="b5" type="checkbox"><label for="b5">記錄目前工作表列數；搬遷後用相同列數核對資料是否完整。</label></li>
+          </ul>
+          <div class="notice"><strong>不要只匯出 CSV。</strong>CSV 是教學紀錄報表，不含完整課表、例外、班級、段考目標、匯入批次與同步操作，不能取代 Google Sheet 複本。</div>
+        </section>
+
+        <section id="github" class="card">
+          <h2>3. 移交 GitHub 專案</h2>
+          <h3>推薦方式：轉移儲存庫擁有權</h3>
+          <ol>
+            <li>原擁有者開啟儲存庫 → <strong>Settings → General → Danger Zone → Transfer ownership</strong>。</li>
+            <li>輸入朋友的 GitHub 帳號與儲存庫名稱 <code>teachflow</code>，送出移轉。</li>
+            <li>朋友須在 <strong>1 天內</strong>接受移轉邀請；接受後到 <strong>Settings → Pages</strong>，確認 Source 為 <strong>GitHub Actions</strong>。</li>
+            <li>到 <strong>Settings → Secrets and variables → Actions → Variables</strong>，稍後建立新的兩個變數。</li>
+          </ol>
+          <div class="notice"><strong>GitHub Pages 舊網址不會跟著儲存庫轉址。</strong>朋友必須使用新帳號下的 Pages 網址。若不想轉移原儲存庫，可由朋友建立新儲存庫再推送完整 Git 歷史；但 Issues、Actions 歷史、Stars 與舊網址不會自動搬遷。</div>
+          <h3>轉移後必改</h3>
+          <p><code>apps-script/Bridge.html</code> 中的 <code>PARENT_ORIGIN</code> 必須改成朋友的新 GitHub Pages origin：</p>
+          <pre>const PARENT_ORIGIN = "https://朋友的GitHub帳號.github.io";</pre>
+          <p>此處只有 origin，不含 <code>/teachflow/</code> 路徑，也不要有結尾斜線。</p>
+        </section>
+
+        <section id="sheet" class="card">
+          <h2>4. 搬遷完整 Google Sheet 資料</h2>
+          <ol>
+            <li>原擁有者打開目前試算表，先再次確認「TeachFlow資料」工作表存在且有資料。</li>
+            <li>將試算表分享給朋友為「編輯者」。</li>
+            <li>朋友用自己的帳號開啟後，選 <strong>檔案 → 建立副本</strong>，存到朋友自己的雲端硬碟。</li>
+            <li>開啟副本，從網址 <code>/spreadsheets/d/這一段/edit</code> 取得<strong>新 Sheet ID</strong>。</li>
+            <li>比對原檔與副本的工作表名稱、資料列數及最後一筆操作時間。</li>
+          </ol>
+          <div class="notice success"><strong>完成標準：</strong>朋友擁有副本，副本內「TeachFlow資料」列數與原檔一致，且最後一列 JSON 可正常顯示。</div>
+          <p>不要手動排序、刪欄、修改 JSON 或把「TeachFlow資料」改名。這是一份追加式操作紀錄，任意改動可能破壞跨裝置還原。</p>
+        </section>
+
+        <section id="script" class="card">
+          <h2>5. 在朋友帳號重建 Apps Script 後端</h2>
+          <ol>
+            <li>朋友到 <a href="https://script.google.com/" target="_blank" rel="noreferrer">script.google.com</a> 建立新專案，名稱可用「TeachFlow Sync Bridge」。</li>
+            <li>把儲存庫 <code>apps-script/Code.gs</code>、<code>Bridge.html</code>、<code>appsscript.json</code> 的內容複製到新專案。</li>
+            <li>修改 <code>Bridge.html</code> 的 <code>PARENT_ORIGIN</code> 為朋友的新 GitHub Pages origin。</li>
+            <li>在 Apps Script <strong>專案設定 → 指令碼屬性</strong>建立以下兩項。</li>
+          </ol>
+          <table><thead><tr><th>屬性</th><th>值</th><th>是否可公開</th></tr></thead><tbody>
+            <tr><td><code>GOOGLE_SHEETS_SPREADSHEET_ID</code></td><td>步驟 4 取得的新 Sheet ID</td><td>識別碼可出現在前端，但仍不要任意散布</td></tr>
+            <tr><td><code>TEACHFLOW_SYNC_SECRET</code></td><td>重新產生至少 24 字元的隨機字串</td><td><strong>不可公開</strong></td></tr>
+          </tbody></table>
+          <h3>部署 Web App</h3>
+          <ol>
+            <li>選 <strong>部署 → 新增部署作業 → 網頁應用程式</strong>。</li>
+            <li>執行身分選「我」；存取權限選「任何人」，並確認此選項允許<strong>未登入 Google</strong> 的訪客載入（官方設定值為 <code>ANYONE_ANONYMOUS</code>）。</li>
+            <li>完成 Google Drive、Docs、Sheets 權限授權。若 Drive OCR 回報服務未啟用，確認進階 Google 服務中的 Drive API v3 已啟用。</li>
+            <li>複製以 <code>/exec</code> 結尾的 Web App URL；不要使用測試用 <code>/dev</code> URL。</li>
+          </ol>
+          <div class="notice">Web App 對外可載入，但真正的資料存取還有三層限制：GitHub Pages origin、同步存取碼與固定 Sheet ID。三者必須一致。</div>
+        </section>
+
+        <section id="deploy" class="card">
+          <h2>6. 更新 GitHub 設定並重新部署</h2>
+          <p>在朋友擁有的儲存庫建立以下 GitHub Actions Variables：</p>
+          <table><thead><tr><th>變數名稱</th><th>值</th></tr></thead><tbody>
+            <tr><td><code>TEACHFLOW_SYNC_BRIDGE_URL</code></td><td>朋友的新 Apps Script <code>/exec</code> URL</td></tr>
+            <tr><td><code>GOOGLE_SHEETS_SPREADSHEET_ID</code></td><td>朋友的新 Sheet ID</td></tr>
+          </tbody></table>
+          <p>接著提交 <code>Bridge.html</code> 的新 origin，推送到 <code>main</code>。GitHub Actions 會執行測試並部署 <code>dist/</code>。</p>
+          <pre>npm test
+npm run check
+git add apps-script/Bridge.html
+git commit -m "chore: transfer TeachFlow ownership"
+git push</pre>
+          <p>在 Actions 頁面確認 <strong>Deploy GitHub Pages</strong> 綠色完成，再開啟朋友的新正式網址。</p>
+        </section>
+
+        <section id="device" class="card">
+          <h2>7. 朋友的新裝置接手</h2>
+          <ol>
+            <li>用朋友的新 GitHub Pages 網址開啟 TeachFlow，必要時重新整理兩次，讓新版 Service Worker 接管。</li>
+            <li>按頂端「本機已儲存／尚未連線」狀態。</li>
+            <li>輸入新的 <code>TEACHFLOW_SYNC_SECRET</code>，按「連線並同步」。</li>
+            <li>等待狀態變成「雲端已同步」。新裝置會從搬遷後的 Sheet 還原班級、課表、進度、段考目標與例外。</li>
+            <li>確認資料無誤後，才把網站加入主畫面。</li>
+          </ol>
+          <div class="notice danger">若新裝置先產生示範資料，不要急著大量編輯。先完成雲端連線並核對遠端資料；若內容不一致，停止操作並執行下方回復方案。</div>
+        </section>
+
+        <section id="verify" class="card">
+          <h2>8. 必做驗收表</h2>
+          <ul class="checklist" data-list="verify">
+            <li><input id="v1" type="checkbox"><label for="v1">朋友的新網址可開啟，GitHub Actions 顯示成功。</label></li>
+            <li><input id="v2" type="checkbox"><label for="v2">輸入新同步存取碼後顯示「雲端已同步」。</label></li>
+            <li><input id="v3" type="checkbox"><label for="v3">班級名稱、年級與常規課表和來源系統一致。</label></li>
+            <li><input id="v4" type="checkbox"><label for="v4">今日課堂、頁碼、單元與備忘一致。</label></li>
+            <li><input id="v5" type="checkbox"><label for="v5">段考日期、目標頁數、考前實質堂數與配速一致。</label></li>
+            <li><input id="v6" type="checkbox"><label for="v6">在朋友裝置修改一筆備忘，等待「雲端已同步」，另一裝置一分鐘內看到更新。</label></li>
+            <li><input id="v7" type="checkbox"><label for="v7">AI 匯入上傳一張非敏感測試圖片，OCR 可完成且確認前不改正式資料。</label></li>
+            <li><input id="v8" type="checkbox"><label for="v8">手機尺寸無水平捲動，今日堂數與考前實質堂數按鈕可操作。</label></li>
+            <li><input id="v9" type="checkbox"><label for="v9">新 Sheet 最後新增了一筆操作列，操作 ID 沒有重複。</label></li>
+          </ul>
+          <div class="actions"><button class="primary" id="print">列印／另存 PDF</button><button class="secondary" id="reset">清除勾選狀態</button></div>
+        </section>
+
+        <section id="rollback" class="card">
+          <h2>9. 搬遷失敗的回復方案</h2>
+          <ol>
+            <li><strong>不要刪除原 Sheet、原 Apps Script 或原 GitHub 儲存庫</strong>，至少保留到朋友完成全部驗收。</li>
+            <li>若新網站無法同步，先核對 GitHub Variables、Script Properties、Web App URL 與 <code>PARENT_ORIGIN</code>。</li>
+            <li>若新 Sheet 資料異常，停止在新網站編輯，重新從原 Sheet 建立一份乾淨副本，再更新兩邊 Sheet ID。</li>
+            <li>若 GitHub Pages 失敗，到 Actions 查看第一個紅色步驟；先在本機跑 <code>npm test</code> 與 <code>npm run check</code>。</li>
+            <li>回復期間仍可使用原網址與原 Sheet，但不要同時在新、舊兩套系統修改，否則操作紀錄會分叉。</li>
+          </ol>
+        </section>
+
+        <section id="security" class="card">
+          <h2>10. 安全收尾</h2>
+          <div class="notice danger"><strong>必做：撤銷先前曾貼在聊天中的 Google 服務帳戶私鑰。</strong>該金鑰不被目前 TeachFlow 前端使用，但既然曾公開出現，就應在 Google Cloud IAM 立即刪除並停用。不要把舊 JSON 憑證交給朋友。</div>
+          <ul class="checklist" data-list="security">
+            <li><input id="s1" type="checkbox"><label for="s1">Google Cloud IAM → 服務帳戶 → 金鑰：刪除已外洩的舊金鑰；若服務帳戶不再使用則停用或刪除。</label></li>
+            <li><input id="s2" type="checkbox"><label for="s2">在朋友的 Apps Script 產生全新的 <code>TEACHFLOW_SYNC_SECRET</code>。</label></li>
+            <li><input id="s3" type="checkbox"><label for="s3">用安全管道把新同步存取碼交給朋友，不放入 GitHub、HTML、Email 主旨或公開訊息。</label></li>
+            <li><input id="s4" type="checkbox"><label for="s4">朋友完成驗收後，原擁有者移除對新 Sheet 與新 Apps Script 的不必要存取權。</label></li>
+            <li><input id="s5" type="checkbox"><label for="s5">在舊裝置按「忘記存取碼」，清除 localStorage 中的舊同步碼。</label></li>
+            <li><input id="s6" type="checkbox"><label for="s6">確認 GitHub 歷史與檔案中沒有 <code>private_key</code>、<code>client_secret</code> 或同步存取碼。</label></li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>官方操作參考</h2>
+          <ul>
+            <li><a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository" target="_blank" rel="noreferrer">GitHub：轉移儲存庫</a></li>
+            <li><a href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noreferrer">Google Apps Script：部署 Web App</a></li>
+            <li><a href="https://developers.google.com/apps-script/guides/properties" target="_blank" rel="noreferrer">Google Apps Script：Script Properties</a></li>
+            <li><a href="https://support.google.com/drive/answer/2494892" target="_blank" rel="noreferrer">Google Drive：檔案擁有權轉移限制</a></li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h2>移交完成定義</h2>
+          <p>只有在朋友帳號擁有 GitHub 專案、Google Sheet 副本與 Apps Script 部署，且朋友的新網址能從新 Sheet 還原完整資料、成功新增同步操作後，才算完成移交。</p>
+          <p class="muted">本指南不包含任何密碼或私鑰，可直接交付。勾選狀態只存於開啟此檔案的瀏覽器 localStorage，不會上傳。</p>
+        </section>
+      </main>
+    </div>
+    <p class="footer">TeachFlow 移交指南 · 產生日期 2026-11-20 · 單一 HTML、無外部資源</p>
+  </div>
+  <script>
+    const storageKey = "teachflow-handover-checklist-v1";
+    const checks = [...document.querySelectorAll('.checklist input[type="checkbox"]')];
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      checks.forEach((input) => { input.checked = Boolean(saved[input.id]); });
+    } catch {}
+    checks.forEach((input) => input.addEventListener("change", () => {
+      const state = Object.fromEntries(checks.map((item) => [item.id, item.checked]));
+      try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch {}
+    }));
+    document.querySelectorAll("[data-copy]").forEach((button) => button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy);
+        const original = button.textContent;
+        button.textContent = "已複製";
+        setTimeout(() => { button.textContent = original; }, 1200);
+      } catch { window.prompt("請複製：", button.dataset.copy); }
+    }));
+    document.querySelector("#print").addEventListener("click", () => window.print());
+    document.querySelector("#reset").addEventListener("click", () => {
+      if (!window.confirm("確定要清除所有移交勾選狀態？")) return;
+      checks.forEach((input) => { input.checked = false; });
+      try { localStorage.removeItem(storageKey); } catch {}
+    });
+  </script>
+</body>
+</html>
