@@ -73,6 +73,10 @@ test("Google Sheet 遠端儲存透過 Apps Script 安全橋接且不把 Google �
   assert.match(remote, /teachflow-secret-change-request/);
   assert.match(pagesWorkflow, /TEACHFLOW_SYNC_BRIDGE_URL/);
   assert.match(pagesWorkflow, /GOOGLE_SHEETS_SPREADSHEET_ID/);
+  assert.match(pagesWorkflow, /Missing required repository variables/);
+  assert.match(pagesWorkflow, /must end with \/exec/);
+  assert.doesNotMatch(pagesWorkflow, /AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/);
+  assert.doesNotMatch(pagesWorkflow, /1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ/);
   assert.match(appsScript, /PropertiesService\.getScriptProperties/);
   assert.match(appsScript, /changeTeachFlowSecret/);
   assert.match(appsScript, /setProperty\("TEACHFLOW_SYNC_SECRET"/);
@@ -138,6 +142,8 @@ test("移交指南包含初學者可完成的 Apps Script 部署與更新流程"
   assert.match(guide, /https:\/\/sheets\.new/);
   assert.match(guide, /先不要執行 GitHub Actions/);
   assert.match(guide, /最後才啟用 Actions 並部署/);
+  assert.match(guide, /Missing required repository variables/);
+  assert.match(guide, /先改示範資料，再第一次連線/);
   assert.doesNotMatch(guide, /1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ/);
   assert.doesNotMatch(guide, /AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/);
   assert.doesNotMatch(guide, /Transfer ownership|轉移儲存庫擁有權/);

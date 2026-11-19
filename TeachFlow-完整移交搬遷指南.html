@@ -120,13 +120,15 @@
 
             <div class="step">
               <h3><span class="step-no">5</span>建立朋友自己的 Actions Variables</h3>
-              <p>完成 Google Sheet 與 Apps Script 後，到朋友的 Fork：</p>
+              <p><strong>先暫停在這裡。</strong>依序完成下一節的<a href="#sheet">全新 Google Sheet</a>與<a href="#script">新 Apps Script 部署</a>，取得兩個新值後，再回到本步驟：</p>
               <ol>
-                <li>進入 <span class="path">Settings → Secrets and variables → Actions → Variables</span>。</li>
-                <li>建立 <code>TEACHFLOW_SYNC_BRIDGE_URL</code>，值填朋友的新 Apps Script <code>/exec</code> 網址。</li>
-                <li>建立 <code>GOOGLE_SHEETS_SPREADSHEET_ID</code>，值填朋友的新 Sheet ID。</li>
+                <li>在朋友 Fork 進入 <span class="path">Settings → Secrets and variables → Actions</span>。</li>
+                <li>切換到 <strong>Variables</strong> 分頁，按 <strong>New repository variable</strong>。</li>
+                <li>Name 填 <code>TEACHFLOW_SYNC_BRIDGE_URL</code>；Value 填朋友的新 Apps Script <code>/exec</code> 網址，按 <strong>Add variable</strong>。</li>
+                <li>再按一次 <strong>New repository variable</strong>；Name 填 <code>GOOGLE_SHEETS_SPREADSHEET_ID</code>；Value 只填朋友的新 Sheet ID。</li>
                 <li>同步存取碼<strong>不要</strong>放在 GitHub Variable 或 Secret；它只存在 Apps Script 的 Script Properties。</li>
               </ol>
+              <div class="result"><strong>完成畫面：</strong>Variables 清單恰好能看到上述兩個名稱；Apps Script URL 以 <code>/exec</code> 結尾，Sheet ID 不是完整網址。</div>
             </div>
 
             <div class="step">
@@ -283,32 +285,44 @@
         </section>
 
         <section id="deploy" class="card">
-          <h2>6. 更新 GitHub 設定並重新部署</h2>
-          <p>在朋友擁有的儲存庫建立以下 GitHub Actions Variables：</p>
+          <h2>6. 回到 GitHub 完成 Variables 與第一次部署</h2>
+          <div class="notice danger"><strong>部署前停止檢查：</strong>下面兩個值缺一不可。工作流程已設計成缺少時直接失敗，不會偷偷使用原教師的 Sheet 或 Apps Script。</div>
           <table><thead><tr><th>變數名稱</th><th>值</th></tr></thead><tbody>
             <tr><td><code>TEACHFLOW_SYNC_BRIDGE_URL</code></td><td>朋友的新 Apps Script <code>/exec</code> URL</td></tr>
             <tr><td><code>GOOGLE_SHEETS_SPREADSHEET_ID</code></td><td>朋友的新 Sheet ID</td></tr>
           </tbody></table>
-          <p>接著提交 <code>Bridge.html</code> 的新 origin，推送到 <code>main</code>。GitHub Actions 會執行測試並部署 <code>dist/</code>。</p>
-          <pre>npm test
-npm run check
-git add apps-script/Bridge.html
-git commit -m "chore: transfer TeachFlow ownership"
-git push</pre>
-          <p>在 Actions 頁面確認 <strong>Deploy GitHub Pages</strong> 綠色完成，再開啟朋友的新正式網址。</p>
+          <ol>
+            <li>依第 3 節步驟 5，在朋友 Fork 建立兩個 Repository Variables。</li>
+            <li>回到 <span class="path">Settings → Pages</span>，確認 Source 是 <strong>GitHub Actions</strong>。</li>
+            <li>開啟 <span class="path">Actions</span>；若 GitHub 顯示 Fork 工作流程尚未啟用，確認這是自己的 Fork 後再按啟用。</li>
+            <li>在左側選 <strong>Deploy GitHub Pages</strong>，按右側 <strong>Run workflow</strong>。</li>
+            <li>Branch 選 <code>main</code>，按綠色 <strong>Run workflow</strong>。</li>
+            <li>重新整理 Actions 頁面，點進最新一筆執行紀錄。等待 <strong>Run core tests</strong>、<strong>Configure secure remote storage</strong>、<strong>Deploy to GitHub Pages</strong> 全部出現綠色勾勾。</li>
+            <li>回到 Settings → Pages，按 <strong>Visit site</strong>，或開啟 <code>https://朋友帳號.github.io/teachflow/</code>。</li>
+          </ol>
+          <h3>如果 Actions 顯示紅色</h3>
+          <table class="trouble"><thead><tr><th>紅色步驟／訊息</th><th>處理方式</th></tr></thead><tbody>
+            <tr><td>Missing required repository variables</td><td>回 Settings → Secrets and variables → Actions → Variables，補齊兩個變數後重新 Run workflow</td></tr>
+            <tr><td>must end with /exec</td><td>貼到 Variable 的是錯誤網址；回 Apps Script 管理部署作業複製正式 Web App URL，不要用 <code>/dev</code></td></tr>
+            <tr><td>Run core tests 失敗</td><td>確認 Fork 的 <code>main</code> 沒有不完整的手動程式修改；可先用 Sync fork 檢查差異，但不要覆蓋自己的 origin</td></tr>
+            <tr><td>Deploy to GitHub Pages 失敗</td><td>確認 Settings → Pages → Source 為 GitHub Actions，然後在 Actions 重新執行失敗工作</td></tr>
+          </tbody></table>
         </section>
 
         <section id="device" class="card">
           <h2>7. 朋友的新裝置接手</h2>
           <ol>
             <li>用朋友的新 GitHub Pages 網址開啟 TeachFlow，必要時重新整理兩次，讓新版 Service Worker 接管。</li>
-            <li>按頂端「本機已儲存／尚未連線」狀態。</li>
-            <li>輸入新的 <code>TEACHFLOW_SYNC_SECRET</code>，按「連線並同步」。</li>
+            <li>先不要連線。進入「常規課表」→「管理班級」，把示範班級改成朋友自己的班級與年級並儲存。</li>
+            <li>逐格設定自己的常規課表；到「段考配速」設定各年級的日期、目標範圍與實質堂數。</li>
+            <li>確認本機畫面正確後，按頂端「本機已儲存／尚未連線」狀態。</li>
+            <li>輸入 Apps Script 中的初始 <code>TEACHFLOW_SYNC_SECRET</code>，按「連線並同步」。</li>
+            <li>等待狀態變成「雲端已同步」。第一次同步會自動建立「TeachFlow資料」並上傳此裝置目前的完整工作資料。</li>
+            <li>回到新 Google Sheet，確認「TeachFlow資料」已有標題列及操作資料；不要修改那些儲存格。</li>
             <li>連線成功後，可展開「自訂／變更同步存取碼」，輸入兩次新碼並儲存；新碼不會寫入 GitHub。</li>
-            <li>等待狀態變成「雲端已同步」。因為 Sheet 是新的，第一次同步會把此裝置目前的班級、課表與設定寫入朋友的新 Sheet。</li>
-            <li>確認資料無誤後，才把網站加入主畫面。</li>
+            <li>用第二台裝置開啟朋友的新網址，輸入同一存取碼，確認資料會還原後，才把網站加入主畫面。</li>
           </ol>
-          <div class="notice"><strong>示範資料處理：</strong>第一次開啟會顯示示範班級。朋友應先在「管理班級」與「常規課表」改成自己的內容，再開始正式記錄；新 Sheet 不會帶入原教師的任何資料。</div>
+          <div class="notice"><strong>順序很重要：</strong>先改示範資料，再第一次連線。新 Sheet 不會帶入原教師的任何資料；第一次連線上傳的是朋友這台裝置當下的內容。</div>
         </section>
 
         <section id="verify" class="card">
