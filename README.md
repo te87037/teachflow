@@ -4,6 +4,9 @@ TeachFlow 是為台灣國高中教師設計的手機優先 PWA。可執行版本
 
 正式部署網址：<https://te87037.github.io/teachflow/>
 
+完整移交、Google Sheet 資料搬遷與安全收尾請開啟：
+[TeachFlow-完整移交搬遷指南.html](./TeachFlow-完整移交搬遷指南.html)
+
 ## 本機啟動
 
 此專案沒有第三方執行期依賴。請使用任一靜態 HTTP server 服務 `dist/`，不要直接以 `file://` 開啟，否則 Service Worker 不會運作。
