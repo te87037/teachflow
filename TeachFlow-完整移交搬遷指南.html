@@ -72,26 +72,68 @@
             <li><input id="b1" type="checkbox"><label for="b1">來源手機／電腦打開 TeachFlow，確認頂端狀態顯示「雲端已同步」。</label></li>
             <li><input id="b2" type="checkbox"><label for="b2">逐一查看班級、課表、段考目標與進度，確認最新修改已出現在另一台裝置。</label></li>
             <li><input id="b3" type="checkbox"><label for="b3">確認 GitHub Actions 最近一次部署成功，且正式網址可開啟。</label></li>
-            <li><input id="b4" type="checkbox"><label for="b4">朋友已準備 GitHub 帳號與 Google 帳號，並能接收儲存庫移轉邀請。</label></li>
+            <li><input id="b4" type="checkbox"><label for="b4">朋友已準備 GitHub 帳號與 Google 帳號，並能在自己的帳號建立 TeachFlow Fork。</label></li>
             <li><input id="b5" type="checkbox"><label for="b5">記錄目前工作表列數；搬遷後用相同列數核對資料是否完整。</label></li>
           </ul>
           <div class="notice"><strong>不要只匯出 CSV。</strong>CSV 是教學紀錄報表，不含完整課表、例外、班級、段考目標、匯入批次與同步操作，不能取代 Google Sheet 複本。</div>
         </section>
 
         <section id="github" class="card">
-          <h2>3. 移交 GitHub 專案</h2>
-          <h3>推薦方式：轉移儲存庫擁有權</h3>
-          <ol>
-            <li>原擁有者開啟儲存庫 → <strong>Settings → General → Danger Zone → Transfer ownership</strong>。</li>
-            <li>輸入朋友的 GitHub 帳號與儲存庫名稱 <code>teachflow</code>，送出移轉。</li>
-            <li>朋友須在 <strong>1 天內</strong>接受移轉邀請；接受後到 <strong>Settings → Pages</strong>，確認 Source 為 <strong>GitHub Actions</strong>。</li>
-            <li>到 <strong>Settings → Secrets and variables → Actions → Variables</strong>，稍後建立新的兩個變數。</li>
-          </ol>
-          <div class="notice"><strong>GitHub Pages 舊網址不會跟著儲存庫轉址。</strong>朋友必須使用新帳號下的 Pages 網址。若不想轉移原儲存庫，可由朋友建立新儲存庫再推送完整 Git 歷史；但 Issues、Actions 歷史、Stars 與舊網址不會自動搬遷。</div>
-          <h3>轉移後必改</h3>
-          <p><code>apps-script/Bridge.html</code> 中的 <code>PARENT_ORIGIN</code> 必須改成朋友的新 GitHub Pages origin：</p>
-          <pre>const PARENT_ORIGIN = "https://朋友的GitHub帳號.github.io";</pre>
-          <p>此處只有 origin，不含 <code>/teachflow/</code> 路徑，也不要有結尾斜線。</p>
+          <h2>3. 用 Fork 複製到朋友的 GitHub 帳號</h2>
+          <p class="lead">Fork 會在朋友帳號建立一份可獨立修改的儲存庫，同時保留與原專案的 upstream 關係。原本的儲存庫與網站不受影響，也不需要轉移擁有權。</p>
+          <div class="steps">
+            <div class="step">
+              <h3><span class="step-no">1</span>建立 Fork</h3>
+              <ol>
+                <li>朋友先登入自己的 GitHub，開啟 <a href="https://github.com/te87037/teachflow" target="_blank" rel="noreferrer">te87037/teachflow</a>。</li>
+                <li>按右上角 <strong>Fork</strong>。</li>
+                <li>Owner 選朋友自己的帳號；Repository name 保持 <code>teachflow</code>。</li>
+                <li>勾選 <strong>Copy the default branch only</strong> 即可，然後按 <strong>Create fork</strong>。</li>
+                <li>完成後網址應是 <code>https://github.com/朋友帳號/teachflow</code>，頁面會標示「forked from te87037/teachflow」。</li>
+              </ol>
+              <div class="result"><strong>完成標準：</strong>朋友能在自己的 Fork 內看見 <code>dist/</code>、<code>apps-script/</code>、<code>.github/workflows/pages.yml</code> 與本移交 HTML。</div>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">2</span>啟用 Fork 自己的 GitHub Actions</h3>
+              <ol>
+                <li>在朋友的 Fork 開啟 <span class="path">Actions</span>。</li>
+                <li>若看到「Workflows aren’t being run」或確認提示，按 <strong>I understand my workflows, go ahead and enable them</strong>。</li>
+                <li>若仍無法執行，到 <span class="path">Settings → Actions → General</span>，確認 Actions permissions 允許使用此專案引用的官方 Actions。</li>
+                <li>不要啟用「把 Secrets 傳回原始專案的 Pull Request」之類選項；TeachFlow 的正式部署只在朋友自己的 Fork 執行。</li>
+              </ol>
+              <p class="micro">Fork 擁有自己的 Actions、設定與權限；原專案的 Variables／Secrets 不會自動複製過來。</p>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">3</span>啟用朋友自己的 GitHub Pages</h3>
+              <ol>
+                <li>在朋友的 Fork 進入 <span class="path">Settings → Pages</span>。</li>
+                <li>在 Build and deployment 的 Source 選 <strong>GitHub Actions</strong>。</li>
+                <li>朋友的正式網址會是 <code>https://朋友帳號.github.io/teachflow/</code>。</li>
+                <li>第一次部署要等本節其他設定完成後再執行；目前先記下這個網址與 origin。</li>
+              </ol>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">4</span>在 Fork 修改 PARENT_ORIGIN</h3>
+              <p><code>apps-script/Bridge.html</code> 中的 <code>PARENT_ORIGIN</code> 必須改成朋友的新 GitHub Pages origin：</p>
+              <pre>const PARENT_ORIGIN = "https://朋友的GitHub帳號.github.io";</pre>
+              <p>此處只有 origin，不含 <code>/teachflow/</code> 路徑，也不要有結尾斜線。可直接在 GitHub 點檔案 → 鉛筆 Edit → 修改 → Commit changes，提交到朋友 Fork 的 <code>main</code>。</p>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">5</span>建立朋友自己的 Actions Variables</h3>
+              <p>完成 Google Sheet 與 Apps Script 後，到朋友的 Fork：</p>
+              <ol>
+                <li>進入 <span class="path">Settings → Secrets and variables → Actions → Variables</span>。</li>
+                <li>建立 <code>TEACHFLOW_SYNC_BRIDGE_URL</code>，值填朋友的新 Apps Script <code>/exec</code> 網址。</li>
+                <li>建立 <code>GOOGLE_SHEETS_SPREADSHEET_ID</code>，值填朋友的新 Sheet ID。</li>
+                <li>同步存取碼<strong>不要</strong>放在 GitHub Variable 或 Secret；它只存在 Apps Script 的 Script Properties。</li>
+              </ol>
+            </div>
+          </div>
+          <div class="notice"><strong>Fork 是獨立部署：</strong>朋友之後可自由修改自己的 Fork。若要取得你後續的更新，可在 Fork 首頁按 <strong>Sync fork → Update branch</strong>；同步前應先查看差異，避免覆蓋朋友自己的 <code>PARENT_ORIGIN</code> 或部署設定。</div>
         </section>
 
         <section id="sheet" class="card">
@@ -304,7 +346,9 @@ git push</pre>
         <section class="card">
           <h2>官方操作參考</h2>
           <ul>
-            <li><a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository" target="_blank" rel="noreferrer">GitHub：轉移儲存庫</a></li>
+            <li><a href="https://docs.github.com/en/pull-requests/how-tos/work-with-forks/fork-a-repo" target="_blank" rel="noreferrer">GitHub：建立 Fork</a></li>
+            <li><a href="https://docs.github.com/en/pull-requests/how-tos/work-with-forks/syncing-a-fork" target="_blank" rel="noreferrer">GitHub：同步 Fork</a></li>
+            <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site" target="_blank" rel="noreferrer">GitHub Pages：使用 GitHub Actions 發布</a></li>
             <li><a href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noreferrer">Google Apps Script：部署 Web App</a></li>
             <li><a href="https://developers.google.com/apps-script/concepts/deployments" target="_blank" rel="noreferrer">Google Apps Script：建立與更新版本化部署</a></li>
             <li><a href="https://developers.google.com/apps-script/guides/properties" target="_blank" rel="noreferrer">Google Apps Script：Script Properties</a></li>

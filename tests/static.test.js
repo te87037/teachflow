@@ -129,4 +129,10 @@ test("移交指南包含初學者可完成的 Apps Script 部署與更新流程"
   assert.match(guide, /ANYONE_ANONYMOUS/);
   assert.match(guide, /\/exec/);
   assert.match(guide, /Apps Script 常見錯誤對照/);
+  assert.match(guide, /用 Fork 複製到朋友的 GitHub 帳號/);
+  assert.match(guide, /Create fork/);
+  assert.match(guide, /Sync fork → Update branch/);
+  assert.match(guide, /Settings → Pages/);
+  assert.match(guide, /Source 選 <strong>GitHub Actions<\/strong>/);
+  assert.doesNotMatch(guide, /Transfer ownership|轉移儲存庫擁有權/);
 });
