@@ -14,7 +14,7 @@
     main{min-width:0}.card{margin-bottom:16px;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:0 8px 24px rgba(31,41,55,.05)}h2{margin:0 0 14px;font-size:21px}h3{margin:22px 0 9px;font-size:16px}p{margin:8px 0}ul,ol{padding-left:22px}.lead{font-size:16px}.notice{padding:14px 16px;border-left:4px solid var(--amber);border-radius:10px;background:#fffbeb;color:#713f12}.danger{border-left-color:var(--red);background:#fff1f2;color:#881337}.success{border-left-color:var(--green);background:#ecfdf5;color:#065f46}
     .inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.datum{min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#f8fafc}.datum small{display:block;color:var(--muted);font-weight:800}.datum code{display:block;margin-top:3px;overflow-wrap:anywhere;color:#334155}.copy-row{display:flex;align-items:flex-start;gap:8px}.copy-row code{flex:1}.copy{flex:0 0 auto;padding:5px 9px;border:0;border-radius:7px;background:#e0e7ff;color:#3730a3;font-size:11px;font-weight:800;cursor:pointer}
     .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}.flow div{position:relative;padding:12px 8px;border:1px solid #c7d2fe;border-radius:12px;background:#eef2ff;text-align:center;color:#3730a3;font-size:12px;font-weight:800}.flow div:not(:last-child)::after{content:"→";position:absolute;right:-9px;top:50%;z-index:2;transform:translateY(-50%);color:#818cf8}
-    .checklist{display:grid;gap:8px;padding:0;list-style:none}.checklist li{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.checklist input{width:18px;height:18px;margin-top:3px;accent-color:var(--indigo)}.checklist label{flex:1;cursor:pointer}.checklist input:checked+label{color:#94a3b8;text-decoration:line-through}
+    .checklist{display:grid;gap:8px;padding:0;list-style:none}.checklist li{display:flex;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.checklist input{width:18px;height:18px;margin-top:3px;accent-color:var(--indigo)}.checklist label{flex:1;cursor:pointer}.checklist input:checked+label{color:#94a3b8;text-decoration:line-through}.steps{display:grid;gap:12px;margin-top:14px}.step{padding:16px;border:1px solid #c7d2fe;border-radius:14px;background:#f8faff}.step h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;color:#312e81}.step-no{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:999px;background:var(--indigo);color:#fff;font-size:13px}.path{display:inline-block;padding:2px 7px;border-radius:6px;background:#eef2ff;color:#3730a3;font-weight:800}.micro{font-size:12px;color:var(--muted)}.result{margin-top:10px;padding:9px 11px;border-radius:8px;background:#ecfdf5;color:#065f46;font-size:13px}.trouble td:first-child{font-weight:800;color:#9f1239}
     code,kbd{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}code{font-size:.92em}pre{overflow:auto;padding:14px;border-radius:12px;background:#111827;color:#e5e7eb;white-space:pre-wrap;overflow-wrap:anywhere}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:10px;border:1px solid var(--line);text-align:left;vertical-align:top}th{background:#f8fafc}.status{font-weight:900;color:var(--green)}.muted{color:var(--muted)}.footer{text-align:center;color:var(--muted);font-size:12px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.primary,.secondary{padding:9px 14px;border-radius:10px;font-weight:800;cursor:pointer}.primary{border:0;background:var(--indigo);color:#fff}.secondary{border:1px solid #c7d2fe;background:#fff;color:var(--indigo)}
     @media(max-width:760px){.shell{width:min(100% - 18px,980px);margin-top:9px}.hero{padding:22px;border-radius:18px}.layout{grid-template-columns:1fr}.toc{position:static}.toc nav{display:grid;grid-template-columns:repeat(2,1fr)}.inventory{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow div:not(:last-child)::after{content:"↓";right:auto;top:auto;bottom:-16px;left:50%;transform:translateX(-50%)}.card{padding:18px}table{display:block;overflow-x:auto}}
     @media print{body{background:#fff}.shell{width:100%;margin:0}.hero{box-shadow:none}.layout{display:block}.toc,.actions,.copy{display:none}.card{break-inside:avoid;box-shadow:none}.checklist input{appearance:none;border:1px solid #64748b}}
@@ -52,7 +52,7 @@
             <div class="datum"><small>資料工作表名稱</small><div class="copy-row"><code>TeachFlow資料</code><button class="copy" data-copy="TeachFlow資料">複製</button></div></div>
             <div class="datum"><small>目前 Apps Script Web App</small><div class="copy-row"><code>https://script.google.com/macros/s/AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/exec</code><button class="copy" data-copy="https://script.google.com/macros/s/AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/exec">複製</button></div></div>
             <div class="datum"><small>目前允許的前端來源</small><div class="copy-row"><code>https://te87037.github.io</code><button class="copy" data-copy="https://te87037.github.io">複製</button></div></div>
-            <div class="datum"><small>移交基準版本</small><code>619cdc4 · style: restore prototype lesson counts</code></div>
+            <div class="datum"><small>移交基準版本</small><code>164fa80 · feat: allow custom sync access codes</code></div>
             <div class="datum"><small>主要技術</small><code>HTML / CSS / ES Modules / IndexedDB / Service Worker / Apps Script / Google Sheets</code></div>
           </div>
           <h3>檔案責任分工</h3>
@@ -108,24 +108,126 @@
         </section>
 
         <section id="script" class="card">
-          <h2>5. 在朋友帳號重建 Apps Script 後端</h2>
-          <ol>
-            <li>朋友到 <a href="https://script.google.com/" target="_blank" rel="noreferrer">script.google.com</a> 建立新專案，名稱可用「TeachFlow Sync Bridge」。</li>
-            <li>把儲存庫 <code>apps-script/Code.gs</code>、<code>Bridge.html</code>、<code>appsscript.json</code> 的內容複製到新專案。</li>
-            <li>修改 <code>Bridge.html</code> 的 <code>PARENT_ORIGIN</code> 為朋友的新 GitHub Pages origin。</li>
-            <li>在 Apps Script <strong>專案設定 → 指令碼屬性</strong>建立以下兩項。</li>
-          </ol>
-          <table><thead><tr><th>屬性</th><th>值</th><th>是否可公開</th></tr></thead><tbody>
-            <tr><td><code>GOOGLE_SHEETS_SPREADSHEET_ID</code></td><td>步驟 4 取得的新 Sheet ID</td><td>識別碼可出現在前端，但仍不要任意散布</td></tr>
-            <tr><td><code>TEACHFLOW_SYNC_SECRET</code></td><td>重新產生至少 24 字元的隨機字串</td><td><strong>不可公開</strong></td></tr>
+          <h2>5. Apps Script 從零建立與部署（初學者版）</h2>
+          <p class="lead">這一節不需要會寫程式。照順序完成 ① 建立專案、② 放入三個檔案、③ 設定兩個屬性、④ 部署、⑤ 驗證即可。請全程使用朋友自己的 Google 帳號。</p>
+          <div class="notice danger"><strong>先準備兩個值：</strong>朋友的新 Google Sheet ID，以及朋友的新 GitHub Pages origin（例如 <code>https://friend.github.io</code>）。不要把同步存取碼貼進 GitHub 或這份 HTML。</div>
+
+          <div class="steps">
+            <div class="step">
+              <h3><span class="step-no">1</span>建立空白 Apps Script 專案</h3>
+              <ol>
+                <li>登入朋友的 Google 帳號，開啟 <a href="https://script.google.com/home" target="_blank" rel="noreferrer">script.google.com/home</a>。</li>
+                <li>按左上方 <strong>「新增專案」</strong>。若畫面先顯示 Apps Script 首頁，按 <strong>「新增指令碼」</strong>或左上角的加號。</li>
+                <li>點頂端「未命名的專案」，改名為 <strong>TeachFlow Sync Bridge</strong>。</li>
+                <li>畫面左側應看到預設檔案 <code>Code.gs</code>。</li>
+              </ol>
+              <div class="result"><strong>完成畫面：</strong>專案名稱是 TeachFlow Sync Bridge，左側有 Code.gs。</div>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">2</span>放入 Code.gs</h3>
+              <ol>
+                <li>另開分頁，開啟 GitHub 的 <a href="https://github.com/te87037/teachflow/blob/main/apps-script/Code.gs" target="_blank" rel="noreferrer">apps-script/Code.gs</a>。</li>
+                <li>按 GitHub 程式碼右上方的複製按鈕；若找不到，按 <strong>Raw</strong> 後按 <kbd>Ctrl</kbd> + <kbd>A</kbd>、<kbd>Ctrl</kbd> + <kbd>C</kbd>。</li>
+                <li>回到 Apps Script，點左側 <code>Code.gs</code>，在編輯區按 <kbd>Ctrl</kbd> + <kbd>A</kbd> 刪掉預設內容，再貼上完整程式碼。</li>
+                <li>按 <kbd>Ctrl</kbd> + <kbd>S</kbd>，或按上方磁碟片圖示儲存。</li>
+              </ol>
+              <p class="micro">不要只複製畫面看得到的前幾行；必須從第一行到最後一個 <code>}</code> 全部複製。</p>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">3</span>建立 Bridge.html 並修改允許網址</h3>
+              <ol>
+                <li>在 Apps Script 左側「檔案」旁按 <strong>＋</strong> → 選 <strong>HTML</strong>。</li>
+                <li>檔名輸入 <strong>Bridge</strong>（不要輸入副檔名）；建立後左側會顯示 <code>Bridge.html</code>。</li>
+                <li>開啟 GitHub 的 <a href="https://github.com/te87037/teachflow/blob/main/apps-script/Bridge.html" target="_blank" rel="noreferrer">apps-script/Bridge.html</a>，複製全部內容，覆蓋 Apps Script 內的預設 HTML。</li>
+                <li>找到 <code>const PARENT_ORIGIN = "https://te87037.github.io";</code>，只把引號內改成朋友的新 Pages origin。</li>
+              </ol>
+              <pre>const PARENT_ORIGIN = "https://朋友帳號.github.io";</pre>
+              <ul>
+                <li>正確：<code>https://friend.github.io</code></li>
+                <li>錯誤：<code>https://friend.github.io/teachflow/</code>（多了路徑）</li>
+                <li>錯誤：<code>https://friend.github.io/</code>（多了結尾斜線）</li>
+              </ul>
+              <p>修改完成後按 <kbd>Ctrl</kbd> + <kbd>S</kbd>。</p>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">4</span>顯示並替換 appsscript.json</h3>
+              <ol>
+                <li>按左側齒輪 <span class="path">專案設定</span>。</li>
+                <li>勾選 <strong>「在編輯器中顯示『appsscript.json』資訊清單檔案」</strong>。</li>
+                <li>回到左側 <span class="path">編輯器 &lt;&gt;</span>，點新出現的 <code>appsscript.json</code>。</li>
+                <li>開啟 GitHub 的 <a href="https://github.com/te87037/teachflow/blob/main/apps-script/appsscript.json" target="_blank" rel="noreferrer">apps-script/appsscript.json</a>，複製全部內容並覆蓋原內容，再儲存。</li>
+              </ol>
+              <div class="result"><strong>這一步會完成：</strong>時區設為 Asia/Taipei、使用 V8、加入 Sheets／Drive／Docs 權限，並啟用 Drive API v3 供圖片 OCR 使用。若專案使用 Apps Script 預設 Cloud 專案，Google 官方說加入進階服務後會自動啟用對應 API。</div>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">5</span>建立兩個 Script Properties</h3>
+              <ol>
+                <li>按左側齒輪 <span class="path">專案設定</span>，向下捲到 <strong>指令碼屬性（Script Properties）</strong>。</li>
+                <li>第一次設定按 <strong>新增指令碼屬性</strong>；之後要修改則按 <strong>編輯指令碼屬性</strong>。</li>
+                <li>逐字建立下表兩列。名稱區分大小寫，不可多空格。</li>
+                <li>按 <strong>儲存指令碼屬性</strong>。</li>
+              </ol>
+              <table><thead><tr><th>屬性名稱（左欄）</th><th>值（右欄）</th><th>注意</th></tr></thead><tbody>
+                <tr><td><code>GOOGLE_SHEETS_SPREADSHEET_ID</code></td><td>步驟 4 取得的新 Sheet ID</td><td>只貼 ID，不要貼完整網址</td></tr>
+                <tr><td><code>TEACHFLOW_SYNC_SECRET</code></td><td>自行決定的初始同步存取碼</td><td><strong>建議至少 12 字元且不可公開</strong>；接手後可在 TeachFlow 網站內再自訂</td></tr>
+              </tbody></table>
+              <p class="micro">Sheet ID 是試算表網址中 <code>/d/</code> 與 <code>/edit</code> 之間的英數字串。</p>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">6</span>建立第一次正式 Web App 部署</h3>
+              <ol>
+                <li>先確認三個檔案都已儲存：<code>Code.gs</code>、<code>Bridge.html</code>、<code>appsscript.json</code>。</li>
+                <li>按右上角 <span class="path">部署</span> → <strong>新增部署作業</strong>。</li>
+                <li>「選取類型」旁按齒輪 → 選 <strong>網頁應用程式（Web app）</strong>。</li>
+                <li>說明可填 <strong>TeachFlow first deployment</strong>。</li>
+                <li>「執行身分」選 <strong>我</strong>（部署者／USER_DEPLOYING）。</li>
+                <li>「誰可以存取」選 <strong>任何人</strong>，必須允許未登入 Google 的瀏覽器載入（官方設定值 <code>ANYONE_ANONYMOUS</code>）。</li>
+                <li>按 <strong>部署</strong>。第一次會要求授權：按「授予存取權」或「審查權限」→ 選朋友帳號 → 檢查要求的 Sheets、Drive、Docs 權限 → 按「允許」。</li>
+                <li>若顯示「Google 尚未驗證這個應用程式」，只有在確認這是朋友自己剛建立、且程式碼來自此 TeachFlow 儲存庫時，才展開進階選項繼續；若專案名稱或帳號不符就停止。</li>
+                <li>部署完成後，複製 <strong>網頁應用程式網址</strong>，它必須以 <code>/exec</code> 結尾。</li>
+              </ol>
+              <div class="notice"><strong>不要使用 /dev：</strong>「測試部署作業」產生的 <code>/dev</code> 網址只有專案編輯者可用。GitHub Variables 必須保存正式的 <code>/exec</code> 網址。</div>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">7</span>以後修改程式時，更新原部署</h3>
+              <p>只按「儲存」不會更新正式網站使用的版本。每次修改 Apps Script 後都要完成以下流程：</p>
+              <ol>
+                <li>按 <span class="path">部署</span> → <strong>管理部署作業</strong>。</li>
+                <li>在左側選目前使用中的 Web App 部署，按右上方鉛筆 <strong>編輯</strong>。</li>
+                <li>「版本」下拉選單選 <strong>新版本</strong>，說明填本次修改內容。</li>
+                <li>按 <strong>部署</strong>。更新原部署會保留同一個 <code>/exec</code> 網址，不必再改 GitHub Variable。</li>
+              </ol>
+              <div class="result"><strong>判斷是否更新成功：</strong>管理部署作業顯示新的版本號與剛才的更新時間。</div>
+            </div>
+
+            <div class="step">
+              <h3><span class="step-no">8</span>先做後端基本驗證</h3>
+              <ol>
+                <li>把剛取得的 <code>/exec</code> 網址貼到新的無痕視窗。</li>
+                <li>正常時會出現很簡單的空白頁；頁面標題可能是 <strong>TeachFlow Sync Bridge</strong>。這代表 Web App 可公開載入。</li>
+                <li>若要求登入 Google，代表「誰可以存取」不是任何人；回到「管理部署作業」修正。</li>
+                <li>完成下一節 GitHub Variables 後，再由 TeachFlow 網站輸入同步存取碼做完整驗證。</li>
+              </ol>
+            </div>
+          </div>
+
+          <h3>Apps Script 常見錯誤對照</h3>
+          <table class="trouble"><thead><tr><th>看到的狀況</th><th>原因</th><th>怎麼修</th></tr></thead><tbody>
+            <tr><td>BACKEND_NOT_CONFIGURED</td><td>兩個 Script Properties 缺少一個或名稱打錯</td><td>到專案設定逐字核對名稱和值，再儲存</td></tr>
+            <tr><td>INVALID_SYNC_SECRET</td><td>網站輸入的碼與 Script Property 不同</td><td>先用目前有效碼連線；之後可在網站內自訂新碼</td></tr>
+            <tr><td>SPREADSHEET_NOT_ALLOWED</td><td>Apps Script 與 GitHub Variable 使用不同 Sheet ID</td><td>讓兩邊的 <code>GOOGLE_SHEETS_SPREADSHEET_ID</code> 完全一致</td></tr>
+            <tr><td>Drive is not defined／OCR 失敗</td><td>Drive API v3 沒有啟用或資訊清單未替換</td><td>核對 <code>appsscript.json</code> 的 <code>enabledAdvancedServices</code>，儲存後部署新版本</td></tr>
+            <tr><td>修改後仍是舊功能</td><td>只儲存程式，沒有更新版本化部署</td><td>部署 → 管理部署作業 → 編輯 → 新版本 → 部署</td></tr>
+            <tr><td>Bridge 載入逾時</td><td><code>PARENT_ORIGIN</code> 錯誤，或 Web App 不允許匿名存取</td><td>origin 只留協定與網域；確認「誰可以存取」為任何人</td></tr>
+            <tr><td>找不到「任何人」選項</td><td>學校／公司 Workspace 管理政策禁止匿名 Web App</td><td>改用允許此設定的個人 Gmail，或請網域管理員開放；不要改成要求每台裝置登入</td></tr>
+            <tr><td>/dev 可以、/exec 不行</td><td>測試程式尚未建立或更新正式版本</td><td>建立正式部署，或把既有部署切到新版本</td></tr>
           </tbody></table>
-          <h3>部署 Web App</h3>
-          <ol>
-            <li>選 <strong>部署 → 新增部署作業 → 網頁應用程式</strong>。</li>
-            <li>執行身分選「我」；存取權限選「任何人」，並確認此選項允許<strong>未登入 Google</strong> 的訪客載入（官方設定值為 <code>ANYONE_ANONYMOUS</code>）。</li>
-            <li>完成 Google Drive、Docs、Sheets 權限授權。若 Drive OCR 回報服務未啟用，確認進階 Google 服務中的 Drive API v3 已啟用。</li>
-            <li>複製以 <code>/exec</code> 結尾的 Web App URL；不要使用測試用 <code>/dev</code> URL。</li>
-          </ol>
           <div class="notice">Web App 對外可載入，但真正的資料存取還有三層限制：GitHub Pages origin、同步存取碼與固定 Sheet ID。三者必須一致。</div>
         </section>
 
@@ -204,7 +306,9 @@ git push</pre>
           <ul>
             <li><a href="https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository" target="_blank" rel="noreferrer">GitHub：轉移儲存庫</a></li>
             <li><a href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noreferrer">Google Apps Script：部署 Web App</a></li>
+            <li><a href="https://developers.google.com/apps-script/concepts/deployments" target="_blank" rel="noreferrer">Google Apps Script：建立與更新版本化部署</a></li>
             <li><a href="https://developers.google.com/apps-script/guides/properties" target="_blank" rel="noreferrer">Google Apps Script：Script Properties</a></li>
+            <li><a href="https://developers.google.com/apps-script/guides/services/advanced" target="_blank" rel="noreferrer">Google Apps Script：啟用進階 Google 服務</a></li>
             <li><a href="https://support.google.com/drive/answer/2494892" target="_blank" rel="noreferrer">Google Drive：檔案擁有權轉移限制</a></li>
           </ul>
         </section>

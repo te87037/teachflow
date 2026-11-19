@@ -114,3 +114,19 @@ test("OCR 使用 PDF.js、Apps Script Drive OCR 與人工核對後套用", async
   assert.match(manifest, /"serviceId": "drive"/);
   assert.match(serviceWorker, /ocr-parser\.js/);
 });
+
+test("移交指南包含初學者可完成的 Apps Script 部署與更新流程", async () => {
+  const guide = await readFile(new URL("../TeachFlow-完整移交搬遷指南.html", import.meta.url), "utf8");
+  assert.match(guide, /Apps Script 從零建立與部署（初學者版）/);
+  assert.match(guide, /Code\.gs/);
+  assert.match(guide, /Bridge\.html/);
+  assert.match(guide, /appsscript\.json/);
+  assert.match(guide, /GOOGLE_SHEETS_SPREADSHEET_ID/);
+  assert.match(guide, /TEACHFLOW_SYNC_SECRET/);
+  assert.match(guide, /新增部署作業/);
+  assert.match(guide, /管理部署作業/);
+  assert.match(guide, /新版本/);
+  assert.match(guide, /ANYONE_ANONYMOUS/);
+  assert.match(guide, /\/exec/);
+  assert.match(guide, /Apps Script 常見錯誤對照/);
+});
