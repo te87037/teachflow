@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="color-scheme" content="light">
-  <title>TeachFlow 完整移交與資料搬遷指南</title>
+  <title>TeachFlow 完整移交與新環境建置指南</title>
   <style>
     :root{--ink:#172033;--muted:#61708a;--line:#dfe5ef;--paper:#fff;--wash:#f4f7fb;--indigo:#4338ca;--indigo2:#312e81;--green:#047857;--amber:#a16207;--red:#be123c;--shadow:0 18px 45px rgba(31,41,55,.10)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--wash);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;line-height:1.65}
@@ -24,8 +24,8 @@
   <div class="shell">
     <header class="hero">
       <p class="eyebrow">TEACHFLOW HANDOVER RUNBOOK</p>
-      <h1>完整移交與資料搬遷指南</h1>
-      <p>給新維護者的一份單檔移交手冊。依序完成 GitHub、Google Sheet、Apps Script、安全設定與驗收，即可把程式、遠端資料及部署權限完整移交。</p>
+      <h1>完整移交與新環境建置指南</h1>
+      <p>給新維護者的一份單檔移交手冊。依序完成 GitHub Fork、全新 Google Sheet、Apps Script、安全設定與驗收，即可建立一套由朋友自行擁有的 TeachFlow。</p>
       <div class="hero-meta"><span class="pill">單一教師版</span><span class="pill">Asia/Taipei</span><span class="pill">GitHub Pages</span><span class="pill">Google Sheets</span><span class="pill">Apps Script</span></div>
     </header>
 
@@ -37,10 +37,11 @@
       <main>
         <section id="scope" class="card">
           <h2>0. 移交範圍與原則</h2>
-          <p class="lead">本次移交包含程式原始碼、GitHub Pages、自動部署、Google Sheet 完整操作紀錄、Apps Script 同步／OCR 後端與新裝置連線設定。</p>
+          <p class="lead">本次移交包含程式原始碼、GitHub Pages、自動部署、全新的 Google Sheet、Apps Script 同步／OCR 後端與新裝置連線設定。</p>
           <div class="notice danger"><strong>不要把密碼、私鑰或同步存取碼寫進此 HTML、GitHub 或聊天紀錄。</strong>本指南只列公開識別資訊與重新建立方式。同步密碼請另外用安全管道交付，並在移交後輪替。</div>
-          <div class="flow"><div>來源裝置完成同步</div><div>複製完整 Sheet</div><div>重建 Apps Script</div><div>更新 GitHub 設定</div><div>新網址驗收</div></div>
-          <p><strong>資料真實來源：</strong>瀏覽器 IndexedDB 是離線工作集；Google Sheet 的「TeachFlow資料」工作表保存跨裝置操作紀錄。移交完整資料時，必須先讓來源裝置顯示「雲端已同步」，再複製 Sheet。</p>
+          <div class="notice"><strong>不搬舊教學資料：</strong>朋友不複製、也不沿用原本的 Google Sheet。原教師的班級、進度、備忘與歷史操作留在原系統；朋友從自己的全新資料庫開始。</div>
+          <div class="flow"><div>Fork 程式</div><div>建立全新 Sheet</div><div>重建 Apps Script</div><div>更新 GitHub 設定</div><div>新網址驗收</div></div>
+          <p><strong>朋友的新資料流：</strong>瀏覽器 IndexedDB 是離線工作集；第一次連上空白 Sheet 時，TeachFlow 會建立「TeachFlow資料」工作表並上傳該裝置目前的班級、課表與設定。之後所有裝置都以朋友的新 Sheet 同步。</p>
         </section>
 
         <section id="inventory" class="card">
@@ -48,9 +49,9 @@
           <div class="inventory">
             <div class="datum"><small>GitHub 儲存庫</small><div class="copy-row"><code>https://github.com/te87037/teachflow</code><button class="copy" data-copy="https://github.com/te87037/teachflow">複製</button></div></div>
             <div class="datum"><small>目前公開網站</small><div class="copy-row"><code>https://te87037.github.io/teachflow/</code><button class="copy" data-copy="https://te87037.github.io/teachflow/">複製</button></div></div>
-            <div class="datum"><small>目前 Google Sheet ID</small><div class="copy-row"><code>1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ</code><button class="copy" data-copy="1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ">複製</button></div></div>
+            <div class="datum"><small>朋友的 Google Sheet</small><code>必須建立全新試算表；不要沿用來源 Sheet ID</code></div>
             <div class="datum"><small>資料工作表名稱</small><div class="copy-row"><code>TeachFlow資料</code><button class="copy" data-copy="TeachFlow資料">複製</button></div></div>
-            <div class="datum"><small>目前 Apps Script Web App</small><div class="copy-row"><code>https://script.google.com/macros/s/AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/exec</code><button class="copy" data-copy="https://script.google.com/macros/s/AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/exec">複製</button></div></div>
+            <div class="datum"><small>朋友的 Apps Script Web App</small><code>必須重新部署並取得新的 /exec 網址</code></div>
             <div class="datum"><small>目前允許的前端來源</small><div class="copy-row"><code>https://te87037.github.io</code><button class="copy" data-copy="https://te87037.github.io">複製</button></div></div>
             <div class="datum"><small>移交基準版本</small><code>164fa80 · feat: allow custom sync access codes</code></div>
             <div class="datum"><small>主要技術</small><code>HTML / CSS / ES Modules / IndexedDB / Service Worker / Apps Script / Google Sheets</code></div>
@@ -69,13 +70,13 @@
         <section id="before" class="card">
           <h2>2. 移交前準備</h2>
           <ul class="checklist" data-list="before">
-            <li><input id="b1" type="checkbox"><label for="b1">來源手機／電腦打開 TeachFlow，確認頂端狀態顯示「雲端已同步」。</label></li>
-            <li><input id="b2" type="checkbox"><label for="b2">逐一查看班級、課表、段考目標與進度，確認最新修改已出現在另一台裝置。</label></li>
+            <li><input id="b1" type="checkbox"><label for="b1">確認朋友要建立獨立的新系統，不搬移原教師的班級、進度、備忘與歷史操作。</label></li>
+            <li><input id="b2" type="checkbox"><label for="b2">確認原 Google Sheet 與原 Apps Script 保留給原教師，不分享給朋友也不刪除。</label></li>
             <li><input id="b3" type="checkbox"><label for="b3">確認 GitHub Actions 最近一次部署成功，且正式網址可開啟。</label></li>
             <li><input id="b4" type="checkbox"><label for="b4">朋友已準備 GitHub 帳號與 Google 帳號，並能在自己的帳號建立 TeachFlow Fork。</label></li>
-            <li><input id="b5" type="checkbox"><label for="b5">記錄目前工作表列數；搬遷後用相同列數核對資料是否完整。</label></li>
+            <li><input id="b5" type="checkbox"><label for="b5">朋友知道新網站第一次開啟會有示範班級，應先改成自己的班級與課表再正式使用。</label></li>
           </ul>
-          <div class="notice"><strong>不要只匯出 CSV。</strong>CSV 是教學紀錄報表，不含完整課表、例外、班級、段考目標、匯入批次與同步操作，不能取代 Google Sheet 複本。</div>
+          <div class="notice"><strong>原資料不在本次交付範圍。</strong>若未來另行決定搬歷史資料，必須重新規劃資料匯入；不要直接把舊 Sheet 的列貼到朋友的新 Sheet。</div>
         </section>
 
         <section id="github" class="card">
@@ -95,14 +96,9 @@
             </div>
 
             <div class="step">
-              <h3><span class="step-no">2</span>啟用 Fork 自己的 GitHub Actions</h3>
-              <ol>
-                <li>在朋友的 Fork 開啟 <span class="path">Actions</span>。</li>
-                <li>若看到「Workflows aren’t being run」或確認提示，按 <strong>I understand my workflows, go ahead and enable them</strong>。</li>
-                <li>若仍無法執行，到 <span class="path">Settings → Actions → General</span>，確認 Actions permissions 允許使用此專案引用的官方 Actions。</li>
-                <li>不要啟用「把 Secrets 傳回原始專案的 Pull Request」之類選項；TeachFlow 的正式部署只在朋友自己的 Fork 執行。</li>
-              </ol>
-              <p class="micro">Fork 擁有自己的 Actions、設定與權限；原專案的 Variables／Secrets 不會自動複製過來。</p>
+              <h3><span class="step-no">2</span>先不要執行 GitHub Actions</h3>
+              <p>Fork 擁有自己的 Actions、設定與權限，但原專案的 Variables／Secrets 不會自動複製。請先完成新 Sheet、新 Apps Script 與朋友自己的 Variables，最後才啟用部署。</p>
+              <div class="notice danger"><strong>此時不要按 Run workflow，也不要確認啟用工作流程。</strong>否則 Fork 可能在新設定完成前，以儲存庫內的舊預設值建立錯誤連線。</div>
             </div>
 
             <div class="step">
@@ -132,21 +128,34 @@
                 <li>同步存取碼<strong>不要</strong>放在 GitHub Variable 或 Secret；它只存在 Apps Script 的 Script Properties。</li>
               </ol>
             </div>
+
+            <div class="step">
+              <h3><span class="step-no">6</span>最後才啟用 Actions 並部署</h3>
+              <ol>
+                <li>確認新 Sheet ID、新 Apps Script <code>/exec</code> URL 與兩個 Variables 都已完成。</li>
+                <li>開啟朋友 Fork 的 <span class="path">Actions</span>。</li>
+                <li>若看到確認提示，按 <strong>I understand my workflows, go ahead and enable them</strong>。</li>
+                <li>選左側 <strong>Deploy GitHub Pages</strong> → <strong>Run workflow</strong> → 選 <code>main</code> → 再按一次綠色按鈕。</li>
+                <li>等待所有步驟變綠，再開啟朋友的 Pages 網址。</li>
+              </ol>
+              <p class="micro">若 Actions 無法執行，到 Settings → Actions → General，確認 Actions permissions 允許此專案引用的官方 Actions。不要開啟把 Secrets 傳給上游 Pull Request 的選項。</p>
+            </div>
           </div>
           <div class="notice"><strong>Fork 是獨立部署：</strong>朋友之後可自由修改自己的 Fork。若要取得你後續的更新，可在 Fork 首頁按 <strong>Sync fork → Update branch</strong>；同步前應先查看差異，避免覆蓋朋友自己的 <code>PARENT_ORIGIN</code> 或部署設定。</div>
         </section>
 
         <section id="sheet" class="card">
-          <h2>4. 搬遷完整 Google Sheet 資料</h2>
+          <h2>4. 朋友建立全新的 Google Sheet</h2>
           <ol>
-            <li>原擁有者打開目前試算表，先再次確認「TeachFlow資料」工作表存在且有資料。</li>
-            <li>將試算表分享給朋友為「編輯者」。</li>
-            <li>朋友用自己的帳號開啟後，選 <strong>檔案 → 建立副本</strong>，存到朋友自己的雲端硬碟。</li>
-            <li>開啟副本，從網址 <code>/spreadsheets/d/這一段/edit</code> 取得<strong>新 Sheet ID</strong>。</li>
-            <li>比對原檔與副本的工作表名稱、資料列數及最後一筆操作時間。</li>
+            <li>朋友登入之後要部署 Apps Script 的同一個 Google 帳號。</li>
+            <li>開啟 <a href="https://sheets.new" target="_blank" rel="noreferrer">sheets.new</a>，建立一份全新空白試算表。</li>
+            <li>把檔名改成 <strong>TeachFlow 遠端資料庫</strong>。</li>
+            <li>不需要手動建立「TeachFlow資料」工作表，也不要貼入原教師的資料；後端第一次同步時會自動建立標題列。</li>
+            <li>從網址 <code>https://docs.google.com/spreadsheets/d/<strong>這一段就是 Sheet ID</strong>/edit</code> 複製新 Sheet ID。</li>
+            <li>把新 Sheet ID 暫存在朋友自己的密碼管理器或私人筆記，稍後要填入 Apps Script 與 GitHub Actions Variable。</li>
           </ol>
-          <div class="notice success"><strong>完成標準：</strong>朋友擁有副本，副本內「TeachFlow資料」列數與原檔一致，且最後一列 JSON 可正常顯示。</div>
-          <p>不要手動排序、刪欄、修改 JSON 或把「TeachFlow資料」改名。這是一份追加式操作紀錄，任意改動可能破壞跨裝置還原。</p>
+          <div class="notice success"><strong>完成標準：</strong>試算表由朋友帳號擁有、目前保持空白，而且朋友已取得新 Sheet ID。完全不需要存取原教師的 Sheet。</div>
+          <p>第一次成功連線後會多出「TeachFlow資料」工作表。之後不要手動排序、刪欄、修改 JSON 或更名，否則可能破壞跨裝置同步。</p>
         </section>
 
         <section id="script" class="card">
@@ -296,10 +305,10 @@ git push</pre>
             <li>按頂端「本機已儲存／尚未連線」狀態。</li>
             <li>輸入新的 <code>TEACHFLOW_SYNC_SECRET</code>，按「連線並同步」。</li>
             <li>連線成功後，可展開「自訂／變更同步存取碼」，輸入兩次新碼並儲存；新碼不會寫入 GitHub。</li>
-            <li>等待狀態變成「雲端已同步」。新裝置會從搬遷後的 Sheet 還原班級、課表、進度、段考目標與例外。</li>
+            <li>等待狀態變成「雲端已同步」。因為 Sheet 是新的，第一次同步會把此裝置目前的班級、課表與設定寫入朋友的新 Sheet。</li>
             <li>確認資料無誤後，才把網站加入主畫面。</li>
           </ol>
-          <div class="notice danger">若新裝置先產生示範資料，不要急著大量編輯。先完成雲端連線並核對遠端資料；若內容不一致，停止操作並執行下方回復方案。</div>
+          <div class="notice"><strong>示範資料處理：</strong>第一次開啟會顯示示範班級。朋友應先在「管理班級」與「常規課表」改成自己的內容，再開始正式記錄；新 Sheet 不會帶入原教師的任何資料。</div>
         </section>
 
         <section id="verify" class="card">
@@ -308,8 +317,8 @@ git push</pre>
             <li><input id="v1" type="checkbox"><label for="v1">朋友的新網址可開啟，GitHub Actions 顯示成功。</label></li>
             <li><input id="v2" type="checkbox"><label for="v2">輸入新同步存取碼後顯示「雲端已同步」。</label></li>
             <li><input id="v2b" type="checkbox"><label for="v2b">在網站內自訂新存取碼成功；舊碼失效，其他裝置可用新碼重新連線。</label></li>
-            <li><input id="v3" type="checkbox"><label for="v3">班級名稱、年級與常規課表和來源系統一致。</label></li>
-            <li><input id="v4" type="checkbox"><label for="v4">今日課堂、頁碼、單元與備忘一致。</label></li>
+            <li><input id="v3" type="checkbox"><label for="v3">朋友已把示範班級、年級與常規課表改成自己的設定。</label></li>
+            <li><input id="v4" type="checkbox"><label for="v4">朋友新增的今日課堂、頁碼、單元與備忘可正常保存。</label></li>
             <li><input id="v5" type="checkbox"><label for="v5">段考日期、目標頁數、考前實質堂數與配速一致。</label></li>
             <li><input id="v6" type="checkbox"><label for="v6">在朋友裝置修改一筆備忘，等待「雲端已同步」，另一裝置一分鐘內看到更新。</label></li>
             <li><input id="v7" type="checkbox"><label for="v7">AI 匯入上傳一張非敏感測試圖片，OCR 可完成且確認前不改正式資料。</label></li>
@@ -324,7 +333,7 @@ git push</pre>
           <ol>
             <li><strong>不要刪除原 Sheet、原 Apps Script 或原 GitHub 儲存庫</strong>，至少保留到朋友完成全部驗收。</li>
             <li>若新網站無法同步，先核對 GitHub Variables、Script Properties、Web App URL 與 <code>PARENT_ORIGIN</code>。</li>
-            <li>若新 Sheet 資料異常，停止在新網站編輯，重新從原 Sheet 建立一份乾淨副本，再更新兩邊 Sheet ID。</li>
+            <li>若新 Sheet 資料異常，停止在新網站編輯，另外建立一份全新空白 Sheet，再更新 Apps Script 與 GitHub 的 Sheet ID；不要改用原教師的 Sheet。</li>
             <li>若 GitHub Pages 失敗，到 Actions 查看第一個紅色步驟；先在本機跑 <code>npm test</code> 與 <code>npm run check</code>。</li>
             <li>回復期間仍可使用原網址與原 Sheet，但不要同時在新、舊兩套系統修改，否則操作紀錄會分叉。</li>
           </ol>
@@ -337,7 +346,7 @@ git push</pre>
             <li><input id="s1" type="checkbox"><label for="s1">Google Cloud IAM → 服務帳戶 → 金鑰：刪除已外洩的舊金鑰；若服務帳戶不再使用則停用或刪除。</label></li>
             <li><input id="s2" type="checkbox"><label for="s2">第一次在 Apps Script 建立 <code>TEACHFLOW_SYNC_SECRET</code>；接手後可在 TeachFlow 網站內自行變更新碼。</label></li>
             <li><input id="s3" type="checkbox"><label for="s3">用安全管道把新同步存取碼交給朋友，不放入 GitHub、HTML、Email 主旨或公開訊息。</label></li>
-            <li><input id="s4" type="checkbox"><label for="s4">朋友完成驗收後，原擁有者移除對新 Sheet 與新 Apps Script 的不必要存取權。</label></li>
+            <li><input id="s4" type="checkbox"><label for="s4">朋友的新 Sheet 與 Apps Script 均由朋友帳號建立，原擁有者沒有不必要的存取權。</label></li>
             <li><input id="s5" type="checkbox"><label for="s5">在舊裝置按「忘記存取碼」，清除 localStorage 中的舊同步碼。</label></li>
             <li><input id="s6" type="checkbox"><label for="s6">確認 GitHub 歷史與檔案中沒有 <code>private_key</code>、<code>client_secret</code> 或同步存取碼。</label></li>
           </ul>
@@ -359,12 +368,12 @@ git push</pre>
 
         <section class="card">
           <h2>移交完成定義</h2>
-          <p>只有在朋友帳號擁有 GitHub 專案、Google Sheet 副本與 Apps Script 部署，且朋友的新網址能從新 Sheet 還原完整資料、成功新增同步操作後，才算完成移交。</p>
+          <p>只有在朋友帳號擁有 GitHub Fork、全新 Google Sheet 與 Apps Script 部署，且朋友的新網址能把自己的班級／課表寫入新 Sheet、再由第二台裝置同步讀回後，才算完成移交。</p>
           <p class="muted">本指南不包含任何密碼或私鑰，可直接交付。勾選狀態只存於開啟此檔案的瀏覽器 localStorage，不會上傳。</p>
         </section>
       </main>
     </div>
-    <p class="footer">TeachFlow 移交指南 · 產生日期 2026-11-20 · 單一 HTML、無外部資源</p>
+    <p class="footer">TeachFlow 移交與新環境建置指南 · 更新日期 2026-11-20 · 單一 HTML、無外部資源</p>
   </div>
   <script>
     const storageKey = "teachflow-handover-checklist-v1";

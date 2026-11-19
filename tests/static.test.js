@@ -134,5 +134,11 @@ test("移交指南包含初學者可完成的 Apps Script 部署與更新流程"
   assert.match(guide, /Sync fork → Update branch/);
   assert.match(guide, /Settings → Pages/);
   assert.match(guide, /Source 選 <strong>GitHub Actions<\/strong>/);
+  assert.match(guide, /朋友建立全新的 Google Sheet/);
+  assert.match(guide, /https:\/\/sheets\.new/);
+  assert.match(guide, /先不要執行 GitHub Actions/);
+  assert.match(guide, /最後才啟用 Actions 並部署/);
+  assert.doesNotMatch(guide, /1yUdarf1y3g2MpH5ZzkDktsfmeJjxSYYCsfxQ3PCWCvQ/);
+  assert.doesNotMatch(guide, /AKfycbzVBEE-P-S7u_81bUy6ozbPk1EjUEF80aNNkNK4qiYWRwN2A1NLS246QYIw6mB8qnwq/);
   assert.doesNotMatch(guide, /Transfer ownership|轉移儲存庫擁有權/);
 });
