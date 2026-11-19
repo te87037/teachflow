@@ -31,6 +31,22 @@ function authorize_(request) {
   return properties;
 }
 
+function changeTeachFlowSecret(request) {
+  const properties = authorize_(request);
+  const newSecret = String(request && request.newSecret || "").trim();
+  if (newSecret.length < 8 || newSecret.length > 128) throw new Error("INVALID_NEW_SYNC_SECRET");
+  if (digest_(newSecret) === digest_(request && request.secret)) throw new Error("SYNC_SECRET_UNCHANGED");
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    properties.setProperty("TEACHFLOW_SYNC_SECRET", newSecret);
+    return { changed: true };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function validOperations_(operations) {
   return Array.isArray(operations) && operations.length <= MAX_OPERATIONS && operations.every(function(item) {
     return item && typeof item === "object" &&

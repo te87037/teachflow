@@ -9,9 +9,10 @@
     if (event.origin !== PARENT_ORIGIN) return;
     const isSync = event.data?.type === "teachflow-sync-request";
     const isOcr = event.data?.type === "teachflow-ocr-request";
-    if (!isSync && !isOcr) return;
+    const isSecretChange = event.data?.type === "teachflow-secret-change-request";
+    if (!isSync && !isOcr && !isSecretChange) return;
     const requestId = event.data.requestId;
-    const responseType = isOcr ? "teachflow-ocr-response" : "teachflow-sync-response";
+    const responseType = isOcr ? "teachflow-ocr-response" : isSecretChange ? "teachflow-secret-change-response" : "teachflow-sync-response";
     const runner = google.script.run
       .withSuccessHandler((result) => {
         event.source.postMessage({ type: responseType, requestId, result }, event.origin);
@@ -24,6 +25,7 @@
         }, event.origin);
       });
     if (isOcr) runner.recognizeTeachFlowPage(event.data.payload);
+    else if (isSecretChange) runner.changeTeachFlowSecret(event.data.payload);
     else runner.syncTeachFlow(event.data.payload);
   });
 

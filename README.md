@@ -42,7 +42,7 @@ Apps Script 專案的 Script Properties 保存 `TEACHFLOW_SYNC_SECRET` 與 `GOOG
 3. 在「配速」核對段考前有效堂數與每堂建議頁數，可展開日期明細。
 4. 在「紀錄」搜尋及核對歷史，右上角可匯出 UTF-8 BOM CSV。
 5. 在「AI 匯入」上傳課表或行事曆；文字型 PDF 本機解析，掃描頁使用 Google Drive OCR，核對後才會套用。
-6. 按雲端狀態，第一次輸入 TeachFlow 同步存取碼；同一裝置之後會自動同步，不必重複登入 Google。
+6. 按雲端狀態，第一次輸入 TeachFlow 同步存取碼；同一裝置之後會自動同步，不必重複登入 Google。連線後可展開「自訂／變更同步存取碼」，直接設定新碼（8–128 個字元）。
 
 ## 維護與資料
 
@@ -56,6 +56,6 @@ Apps Script 專案的 Script Properties 保存 `TEACHFLOW_SYNC_SECRET` 與 `GOOG
 - 首版固定為單一教師與單一 Google Sheet；瀏覽器以可輪替同步存取碼連線 Apps Script，沒有多使用者帳號或管理後台。
 - OCR 已支援文字型／掃描型 PDF、JPG 與 PNG，辨識結果必須人工核對；複雜合併儲存格、手寫內容與特殊課表格式仍可能需要手動修正。
 - 課表目前只讀；尚未提供版本編輯、原子對調與撤銷 UI。
-- 同步存取碼保存在該裝置的 localStorage；共用或遺失的裝置應按「忘記存取碼」，必要時輪替 Apps Script 的 Script Property。
+- 同步存取碼保存在該裝置的 localStorage；共用或遺失的裝置應按「忘記存取碼」。已連線的管理者可在雲端設定視窗直接輪替新碼，輪替後其他裝置須重新輸入。
 - 追加式同步保留操作歷史，跨裝置同一筆資料以原始修改時間較新者為準；尚未提供人工衝突選擇 UI。
 - PWA 圖示目前為 SVG；正式 iOS 發佈前補 192px／512px PNG 與 Apple touch icon。

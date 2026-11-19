@@ -151,6 +151,7 @@ git push</pre>
             <li>用朋友的新 GitHub Pages 網址開啟 TeachFlow，必要時重新整理兩次，讓新版 Service Worker 接管。</li>
             <li>按頂端「本機已儲存／尚未連線」狀態。</li>
             <li>輸入新的 <code>TEACHFLOW_SYNC_SECRET</code>，按「連線並同步」。</li>
+            <li>連線成功後，可展開「自訂／變更同步存取碼」，輸入兩次新碼並儲存；新碼不會寫入 GitHub。</li>
             <li>等待狀態變成「雲端已同步」。新裝置會從搬遷後的 Sheet 還原班級、課表、進度、段考目標與例外。</li>
             <li>確認資料無誤後，才把網站加入主畫面。</li>
           </ol>
@@ -162,6 +163,7 @@ git push</pre>
           <ul class="checklist" data-list="verify">
             <li><input id="v1" type="checkbox"><label for="v1">朋友的新網址可開啟，GitHub Actions 顯示成功。</label></li>
             <li><input id="v2" type="checkbox"><label for="v2">輸入新同步存取碼後顯示「雲端已同步」。</label></li>
+            <li><input id="v2b" type="checkbox"><label for="v2b">在網站內自訂新存取碼成功；舊碼失效，其他裝置可用新碼重新連線。</label></li>
             <li><input id="v3" type="checkbox"><label for="v3">班級名稱、年級與常規課表和來源系統一致。</label></li>
             <li><input id="v4" type="checkbox"><label for="v4">今日課堂、頁碼、單元與備忘一致。</label></li>
             <li><input id="v5" type="checkbox"><label for="v5">段考日期、目標頁數、考前實質堂數與配速一致。</label></li>
@@ -189,7 +191,7 @@ git push</pre>
           <div class="notice danger"><strong>必做：撤銷先前曾貼在聊天中的 Google 服務帳戶私鑰。</strong>該金鑰不被目前 TeachFlow 前端使用，但既然曾公開出現，就應在 Google Cloud IAM 立即刪除並停用。不要把舊 JSON 憑證交給朋友。</div>
           <ul class="checklist" data-list="security">
             <li><input id="s1" type="checkbox"><label for="s1">Google Cloud IAM → 服務帳戶 → 金鑰：刪除已外洩的舊金鑰；若服務帳戶不再使用則停用或刪除。</label></li>
-            <li><input id="s2" type="checkbox"><label for="s2">在朋友的 Apps Script 產生全新的 <code>TEACHFLOW_SYNC_SECRET</code>。</label></li>
+            <li><input id="s2" type="checkbox"><label for="s2">第一次在 Apps Script 建立 <code>TEACHFLOW_SYNC_SECRET</code>；接手後可在 TeachFlow 網站內自行變更新碼。</label></li>
             <li><input id="s3" type="checkbox"><label for="s3">用安全管道把新同步存取碼交給朋友，不放入 GitHub、HTML、Email 主旨或公開訊息。</label></li>
             <li><input id="s4" type="checkbox"><label for="s4">朋友完成驗收後，原擁有者移除對新 Sheet 與新 Apps Script 的不必要存取權。</label></li>
             <li><input id="s5" type="checkbox"><label for="s5">在舊裝置按「忘記存取碼」，清除 localStorage 中的舊同步碼。</label></li>

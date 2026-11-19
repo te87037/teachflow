@@ -1,0 +1,31 @@
+.change-code-panel {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.change-code-panel summary {
+  cursor: pointer;
+  color: #4338ca;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.change-code-panel[open] summary {
+  margin-bottom: 8px;
+}
+
+.change-code-button {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.change-code-button:disabled {
+  opacity: .55;
+  cursor: wait;
+}

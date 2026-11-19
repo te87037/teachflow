@@ -8,7 +8,7 @@
 
 1. PWA 客戶端：快記、課表、歷史、配速、匯入核對、離線佇列。
 2. Apps Script Web App：以隱藏 iframe 與 postMessage 建立跨網域橋接，驗證 GitHub Pages origin、裝置保存的 TeachFlow 同步存取碼、固定試算表 ID 與請求大小。
-3. Google Sheets：Apps Script 以擁有者身分將具 UUID 的 SyncOperation 追加到「TeachFlow資料」工作表；Script Properties 與後端存取碼形成授權邊界。
+3. Google Sheets：Apps Script 以擁有者身分將具 UUID 的 SyncOperation 追加到「TeachFlow資料」工作表；Script Properties 與後端存取碼形成授權邊界。存取碼輪替必須先驗證目前存取碼，再由 Apps Script 在鎖內更新 Script Property；前端只在後端成功後更新該裝置的 localStorage。
 4. 可替換辨識介面：未來由伺服器保存 OCR 金鑰；前端不得包含供應商密鑰。
 
 ## 2. 資料模型

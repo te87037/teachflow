@@ -2,7 +2,7 @@ import { BUSINESS_STORES, all, applyRemoteOperations, commitImportBatch, exportS
 import { addDays, browserDateKey, classProgress, currentOrNextLessonId, dateKey, expandLessons, pace, remainingLessons, weekdayOf } from "./engine.js?v=14";
 import { prepareImportPages } from "./ocr.js";
 import { parseImportCandidates } from "./ocr-parser.js";
-import { appendOperations, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations, recognizeOcrPage } from "./remote.js";
+import { appendOperations, changeAccessCode, configuredSpreadsheetId, connectGoogle, disconnectGoogle, extractSpreadsheetId, googleRemoteConfigured, isGoogleConnected, pullOperations, recognizeOcrPage } from "./remote.js";
 
 const state = { classes: [], subjects: [], materials: [], periods: [], scheduleVersions: [], events: [], exceptions: [], records: [], targets: [], importBatches: [], lessons: [], selectedDate: browserDateKey(), selectedPaceGrade: null };
 const weekdays = ["", "一", "二", "三", "四", "五", "六", "日"];
@@ -753,6 +753,34 @@ $("#connect-google").addEventListener("click", async () => {
   }
 });
 $("#disconnect-google").addEventListener("click", () => { disconnectGoogle(); $("#sync-access-code").value = ""; setConnectionStatus("本機已儲存"); });
+$("#change-sync-access-code").addEventListener("click", async () => {
+  const button = $("#change-sync-access-code");
+  const nextCode = $("#new-sync-access-code").value.trim();
+  const confirmation = $("#confirm-sync-access-code").value.trim();
+  if (!isGoogleConnected()) { setConnectionStatus("請先用目前存取碼連線"); return; }
+  if (nextCode.length < 8 || nextCode.length > 128) { setConnectionStatus("新存取碼需為 8–128 個字元"); return; }
+  if (nextCode !== confirmation) { setConnectionStatus("兩次輸入的新存取碼不一致"); return; }
+  button.disabled = true;
+  try {
+    setConnectionStatus("正在更新同步存取碼…");
+    await changeAccessCode(nextCode);
+    $("#new-sync-access-code").value = "";
+    $("#confirm-sync-access-code").value = "";
+    $("#change-code-panel").open = false;
+    setConnectionStatus("同步存取碼已更新");
+    showToast("同步存取碼已更新，其他裝置請重新輸入", "🔐");
+  } catch (error) {
+    console.error(error);
+    const messages = {
+      INVALID_SYNC_SECRET: "目前儲存的同步存取碼已失效",
+      INVALID_NEW_SYNC_SECRET: "新存取碼需為 8–128 個字元",
+      SYNC_SECRET_UNCHANGED: "新存取碼不可與目前相同"
+    };
+    setConnectionStatus(messages[error.message] || "同步存取碼更新失敗");
+  } finally {
+    button.disabled = false;
+  }
+});
 window.addEventListener("online", () => { setConnectionStatus(isGoogleConnected() ? "同步中…" : "本機已儲存"); void syncGoogleSheet(); });
 window.addEventListener("offline", () => setConnectionStatus("離線 · 本機已儲存"));
 document.addEventListener("visibilitychange", () => {

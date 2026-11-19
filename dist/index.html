@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="./responsive.css?v=11">
   <link rel="stylesheet" href="./ocr.css?v=11">
   <link rel="stylesheet" href="./classes.css?v=23">
+  <link rel="stylesheet" href="./sync.css?v=24">
   <title>TeachFlow 教學進度管家</title>
 </head>
 <body>
@@ -119,10 +120,17 @@
       <label>TeachFlow 同步存取碼<input id="sync-access-code" type="password" autocomplete="current-password" placeholder="每台裝置只需輸入一次"></label>
       <p id="cloud-detail" class="dialog-copy">尚未連接。</p>
       <div class="dialog-actions"><button id="disconnect-google" class="cancel-button" type="button">忘記存取碼</button><button id="connect-google" class="primary-button" type="button">連線並同步</button></div>
+      <details id="change-code-panel" class="change-code-panel">
+        <summary>自訂／變更同步存取碼</summary>
+        <p class="dialog-copy">請先用目前存取碼連線，再設定 8–128 個字元的新存取碼。變更後，其他裝置須重新輸入新碼。</p>
+        <label>新同步存取碼<input id="new-sync-access-code" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="至少 8 個字元"></label>
+        <label>再次輸入新存取碼<input id="confirm-sync-access-code" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="再次輸入確認"></label>
+        <button id="change-sync-access-code" class="secondary-button change-code-button" type="button">儲存新的同步存取碼</button>
+      </details>
     </form>
   </dialog>
 
   <script src="./remote-config.js"></script>
-  <script type="module" src="./app.js?v=23"></script>
+  <script type="module" src="./app.js?v=24"></script>
 </body>
 </html>

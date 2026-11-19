@@ -43,7 +43,7 @@ function ensureBridge() {
         return;
       }
       if (event.source !== bridgeWindow) return;
-      if (!["teachflow-sync-response", "teachflow-ocr-response"].includes(event.data?.type)) return;
+      if (!["teachflow-sync-response", "teachflow-ocr-response", "teachflow-secret-change-response"].includes(event.data?.type)) return;
       const pending = pendingRequests.get(event.data.requestId);
       if (!pending) return;
       pendingRequests.delete(event.data.requestId);
@@ -104,6 +104,14 @@ export async function connectGoogle(code) {
     if (String(error.message).includes("INVALID_SYNC_SECRET")) error.status = 401;
     throw error;
   }
+}
+
+export async function changeAccessCode(newCode) {
+  const normalized = String(newCode || "").trim();
+  if (normalized.length < 8 || normalized.length > 128) throw new Error("INVALID_NEW_SYNC_SECRET");
+  const result = await bridgeRequest("teachflow-secret-change-request", { newSecret: normalized });
+  if (!result.changed) throw new Error("SYNC_SECRET_CHANGE_FAILED");
+  saveAccessCode(normalized);
 }
 
 export function disconnectGoogle() {

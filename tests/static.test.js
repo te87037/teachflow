@@ -11,7 +11,7 @@ test("參考介面的四分頁與卡片內快記控制已還原", async () => {
   assert.match(html, /id="manage-classes"/);
   assert.match(html, /id="classes-dialog"/);
   assert.match(html, /classes\.css\?v=23/);
-  assert.match(html, /app\.js\?v=23/);
+  assert.match(html, /app\.js\?v=24/);
   assert.match(html, /id="header-class-count"/);
   assert.match(html, /id="exam-target-config-button"/);
   assert.match(html, /id="pace-grade-buttons"/);
@@ -67,14 +67,19 @@ test("Google Sheet 遠端儲存透過 Apps Script 安全橋接且不把 Google �
   assert.match(html, /remote-config\.js/);
   assert.match(html, /Google Sheet 遠端儲存/);
   assert.match(html, /TeachFlow 同步存取碼/);
+  assert.match(html, /自訂／變更同步存取碼/);
   assert.match(remote, /localStorage\.setItem/);
   assert.match(remote, /teachflow-sync-request/);
+  assert.match(remote, /teachflow-secret-change-request/);
   assert.match(pagesWorkflow, /TEACHFLOW_SYNC_BRIDGE_URL/);
   assert.match(pagesWorkflow, /GOOGLE_SHEETS_SPREADSHEET_ID/);
   assert.match(appsScript, /PropertiesService\.getScriptProperties/);
+  assert.match(appsScript, /changeTeachFlowSecret/);
+  assert.match(appsScript, /setProperty\("TEACHFLOW_SYNC_SECRET"/);
   assert.match(appsScript, /SpreadsheetApp\.openById/);
   assert.match(appsScript, /LockService\.getScriptLock/);
   assert.match(bridge, /event\.origin !== PARENT_ORIGIN/);
+  assert.match(bridge, /teachflow-secret-change-request/);
   assert.match(serviceWorker, /self\.skipWaiting\(\)/);
   assert.match(serviceWorker, /self\.clients\.claim\(\)/);
   assert.match(serviceWorker, /classes\.css/);
