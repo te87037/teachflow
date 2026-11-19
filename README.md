@@ -47,7 +47,7 @@ Apps Script 專案的 Script Properties 保存 `TEACHFLOW_SYNC_SECRET` 與 `GOOG
 ## 維護與資料
 
 - IndexedDB 名稱為 `teachflow`；資料庫版本目前為 1。
-- Service Worker cache 名稱為 `teachflow-v8`，安裝後立即接管既有分頁。更新靜態資源時應同步增加 cache 版本。
+- Service Worker cache 名稱目前為 `teachflow-v24`，安裝後立即接管既有分頁。更新靜態資源時應同步增加 cache 版本。
 - 資料模型變更必須先新增遷移，不得刪除 `syncQueue` 中尚未同步的操作。
 - 核心計算規則修改時，同步更新 spec.md、design.md、tests 與 acceptance.md。
 
@@ -55,7 +55,7 @@ Apps Script 專案的 Script Properties 保存 `TEACHFLOW_SYNC_SECRET` 與 `GOOG
 
 - 首版固定為單一教師與單一 Google Sheet；瀏覽器以可輪替同步存取碼連線 Apps Script，沒有多使用者帳號或管理後台。
 - OCR 已支援文字型／掃描型 PDF、JPG 與 PNG，辨識結果必須人工核對；複雜合併儲存格、手寫內容與特殊課表格式仍可能需要手動修正。
-- 課表目前只讀；尚未提供版本編輯、原子對調與撤銷 UI。
+- 班級、年級與常規課表可在介面編輯，也支援單次調課；尚未提供完整撤銷 UI。
 - 同步存取碼保存在該裝置的 localStorage；共用或遺失的裝置應按「忘記存取碼」。已連線的管理者可在雲端設定視窗直接輪替新碼，輪替後其他裝置須重新輸入。
 - 追加式同步保留操作歷史，跨裝置同一筆資料以原始修改時間較新者為準；尚未提供人工衝突選擇 UI。
 - PWA 圖示目前為 SVG；正式 iOS 發佈前補 192px／512px PNG 與 Apple touch icon。
